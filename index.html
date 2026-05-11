@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Cert Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Nunito',sans-serif;background:#fff;color:#1a1a2e;overflow-x:hidden}
+  :root{
+    --green:#16a34a;--green-light:#dcfce7;
+    --purple:#7c3aed;--purple-light:#ede9fe;
+    --orange:#ea580c;--orange-light:#ffedd5;
+    --blue:#2563eb;--blue-light:#dbeafe;
+    --yellow:#d97706;--yellow-light:#fef3c7;
+    --pink:#db2777;--pink-light:#fce7f3;
+  }
+  a{text-decoration:none;color:inherit}
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;border-bottom:2px solid #f3f4f6;background:#fff;position:sticky;top:0;z-index:100}
+  .logo{font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:var(--purple)}
+  .logo span{color:var(--green)}
+  .nav-links{display:flex;gap:1.5rem;align-items:center}
+  .nav-links a{font-weight:600;font-size:0.95rem;color:#374151;transition:color .2s}
+  .nav-links a:hover{color:var(--purple)}
+  .nav-btn{background:var(--purple);color:#fff;padding:0.5rem 1.4rem;border-radius:50px;font-weight:700;font-size:0.9rem;transition:transform .15s,background .2s}
+  .nav-btn:hover{background:#6d28d9;transform:scale(1.04)}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#f5f3ff 0%,#fef9c3 50%,#dcfce7 100%);padding:5rem 2.5rem 4rem;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-60px;left:-60px;width:220px;height:220px;background:radial-gradient(circle,#c4b5fd55,transparent 70%);border-radius:50%}
+  .hero::after{content:'';position:absolute;bottom:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,#bbf7d055,transparent 70%);border-radius:50%}
+  .hero-badge{display:inline-block;background:var(--purple-light);color:var(--purple);font-weight:700;font-size:0.8rem;padding:0.35rem 1rem;border-radius:50px;margin-bottom:1.2rem;letter-spacing:.04em}
+  .hero h1{font-family:'Baloo 2',cursive;font-size:3.2rem;font-weight:800;line-height:1.15;margin-bottom:1.2rem;color:#1a1a2e}
+  .hero h1 span.h-green{color:var(--green)}
+  .hero h1 span.h-purple{color:var(--purple)}
+  .hero p{font-size:1.15rem;color:#4b5563;max-width:600px;margin:0 auto 2rem;line-height:1.7}
+  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .btn-primary{background:var(--purple);color:#fff;padding:0.8rem 2rem;border-radius:50px;font-weight:800;font-size:1rem;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 14px #7c3aed44}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px #7c3aed55}
+  .btn-secondary{background:#fff;color:var(--purple);border:2px solid var(--purple);padding:0.8rem 2rem;border-radius:50px;font-weight:800;font-size:1rem;transition:transform .15s}
+  .btn-secondary:hover{transform:translateY(-2px)}
+  .hero-stats{display:flex;gap:2.5rem;justify-content:center;margin-top:3rem;flex-wrap:wrap}
+  .stat{text-align:center}
+  .stat-num{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:var(--purple)}
+  .stat-label{font-size:0.85rem;color:#6b7280;font-weight:600}
+
+  /* MARQUEE */
+  .marquee-wrap{background:var(--purple);padding:0.75rem 0;overflow:hidden;white-space:nowrap}
+  .marquee-inner{display:inline-block;animation:marquee 18s linear infinite}
+  .marquee-inner span{color:#fff;font-weight:700;font-size:0.9rem;padding:0 2rem}
+  .marquee-inner span::before{content:'★ ';color:#fde68a}
+  @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+  /* FEATURES */
+  .section{padding:4rem 2.5rem}
+  .section-label{text-align:center;font-size:0.8rem;font-weight:700;letter-spacing:.1em;color:var(--purple);text-transform:uppercase;margin-bottom:0.6rem}
+  .section-title{text-align:center;font-family:'Baloo 2',cursive;font-size:2.2rem;font-weight:800;margin-bottom:0.75rem;color:#1a1a2e}
+  .section-sub{text-align:center;color:#6b7280;font-size:1rem;max-width:560px;margin:0 auto 3rem;line-height:1.6}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;max-width:1000px;margin:0 auto}
+  .feat-card{background:#fff;border-radius:20px;padding:1.5rem;border:2px solid #f3f4f6;transition:transform .2s,border-color .2s;cursor:default}
+  .feat-card:hover{transform:translateY(-4px)}
+  .feat-card.c1:hover{border-color:var(--purple)}
+  .feat-card.c2:hover{border-color:var(--green)}
+  .feat-card.c3:hover{border-color:var(--orange)}
+  .feat-card.c4:hover{border-color:var(--blue)}
+  .feat-card.c5:hover{border-color:var(--yellow)}
+  .feat-card.c6:hover{border-color:var(--pink)}
+  .feat-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+  .feat-icon.ic1{background:var(--purple-light)}
+  .feat-icon.ic2{background:var(--green-light)}
+  .feat-icon.ic3{background:var(--orange-light)}
+  .feat-icon.ic4{background:var(--blue-light)}
+  .feat-icon.ic5{background:var(--yellow-light)}
+  .feat-icon.ic6{background:var(--pink-light)}
+  .feat-card h3{font-weight:800;font-size:1rem;margin-bottom:0.4rem;color:#1a1a2e}
+  .feat-card p{font-size:0.875rem;color:#6b7280;line-height:1.55}
+
+  /* COURSES */
+  .courses-bg{background:#fafafa;padding:4rem 2.5rem}
+  .courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:1000px;margin:0 auto}
+  .course-card{background:#fff;border-radius:20px;overflow:hidden;border:2px solid #f3f4f6;transition:transform .2s,box-shadow .2s;cursor:pointer}
+  .course-card:hover{transform:translateY(-5px);box-shadow:0 12px 30px #0001}
+  .course-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:800;font-family:'Baloo 2',cursive;color:#fff;letter-spacing:-1px}
+  .thumb-purple{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+  .thumb-green{background:linear-gradient(135deg,#16a34a,#22c55e)}
+  .thumb-orange{background:linear-gradient(135deg,#ea580c,#f97316)}
+  .thumb-blue{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+  .course-body{padding:1.2rem}
+  .course-tag{display:inline-block;font-size:0.72rem;font-weight:700;padding:0.25rem 0.75rem;border-radius:50px;margin-bottom:0.6rem}
+  .tag-purple{background:var(--purple-light);color:var(--purple)}
+  .tag-green{background:var(--green-light);color:var(--green)}
+  .tag-orange{background:var(--orange-light);color:var(--orange)}
+  .tag-blue{background:var(--blue-light);color:var(--blue)}
+  .course-body h3{font-weight:800;font-size:1rem;margin-bottom:0.4rem;color:#1a1a2e}
+  .course-meta{display:flex;gap:1rem;font-size:0.78rem;color:#9ca3af;margin-top:0.75rem;font-weight:600}
+  .course-progress{margin-top:0.8rem;background:#f3f4f6;border-radius:50px;height:6px}
+  .course-progress-bar{height:6px;border-radius:50px;background:linear-gradient(90deg,var(--purple),var(--green))}
+
+  /* HOW IT WORKS */
+  .steps{display:flex;gap:1.5rem;justify-content:center;max-width:900px;margin:0 auto;flex-wrap:wrap}
+  .step{flex:1;min-width:180px;text-align:center;padding:1.5rem 1rem;background:#fff;border-radius:20px;border:2px solid #f3f4f6;position:relative}
+  .step-num{width:44px;height:44px;border-radius:50%;font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+  .sn1{background:var(--purple)}.sn2{background:var(--green)}.sn3{background:var(--orange)}.sn4{background:var(--blue)}
+  .step h3{font-weight:800;font-size:0.95rem;margin-bottom:0.4rem;color:#1a1a2e}
+  .step p{font-size:0.82rem;color:#6b7280;line-height:1.5}
+
+  /* CTA */
+  .cta{background:linear-gradient(135deg,#7c3aed,#a855f7);padding:5rem 2.5rem;text-align:center}
+  .cta h2{font-family:'Baloo 2',cursive;font-size:2.4rem;font-weight:800;color:#fff;margin-bottom:1rem}
+  .cta p{color:#e9d5ff;font-size:1.05rem;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.6}
+  .cta-btn{background:#fff;color:var(--purple);padding:0.85rem 2.4rem;border-radius:50px;font-weight:800;font-size:1.05rem;display:inline-block;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 20px #0003}
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px #0005}
+
+  /* FOOTER */
+  footer{background:#1a1a2e;color:#9ca3af;padding:2rem 2.5rem;text-align:center;font-size:0.85rem}
+  footer span{color:#a78bfa;font-weight:700}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Free<span>Cert</span>Hub</div>
+  <div class="nav-links">
+    <a href="#">Courses</a>
+    <a href="#">Exams</a>
+    <a href="#">Certificates</a>
+    <a href="#">About</a>
+    <a href="login.html" class="nav-btn">Start Learning Free</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">🎓 100% Free · AI-Powered · Certified</div>
+  <h1>Learn. Pass. Get <span class="h-green">Certified</span><br>With <span class="h-purple">AI-Powered</span> Courses</h1>
+  <p>Watch video lessons, pass AI-generated quizzes, and earn real certificates — all for free. NCERT, competitive exams, skill courses and more!</p>
+  <div class="hero-btns">
+    <a href="login.html" class="btn-primary">🚀 Start Learning Free</a>
+    <a href="#courses" class="btn-secondary">Browse Courses</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Free Courses</div></div>
+    <div class="stat"><div class="stat-num">50K+</div><div class="stat-label">Students</div></div>
+    <div class="stat"><div class="stat-num">10K+</div><div class="stat-label">Certificates Issued</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free Forever</div></div>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <span>NCERT Courses</span><span>Competitive Exams</span><span>Skill Courses</span><span>AI Quizzes</span><span>Free Certificates</span><span>Cheat Detection</span><span>Unlimited Question Papers</span><span>Video Lessons</span>
+    <span>NCERT Courses</span><span>Competitive Exams</span><span>Skill Courses</span><span>AI Quizzes</span><span>Free Certificates</span><span>Cheat Detection</span><span>Unlimited Question Papers</span><span>Video Lessons</span>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-label">Why Choose Us</div>
+  <div class="section-title">Everything You Need to Succeed</div>
+  <div class="section-sub">Honest learning with AI that ensures every certificate means something.</div>
+  <div class="features-grid">
+    <div class="feat-card c1"><div class="feat-icon ic1">🎬</div><h3>Non-Skippable Videos</h3><p>Must watch every second. Tab switching pauses the lesson automatically.</p></div>
+    <div class="feat-card c2"><div class="feat-icon ic2">🤖</div><h3>AI Quiz After Each Video</h3><p>Smart questions generated by AI after every lesson to test your understanding.</p></div>
+    <div class="feat-card c3"><div class="feat-icon ic3">🔍</div><h3>Cheat Detection</h3><p>AI detects if you're copying to ChatGPT. Get caught = auto fail. Keep it real.</p></div>
+    <div class="feat-card c4"><div class="feat-icon ic4">📜</div><h3>Real Certificates</h3><p>Earn a verified certificate only after watching all videos and passing all tests.</p></div>
+    <div class="feat-card c5"><div class="feat-icon ic5">📝</div><h3>Unlimited Question Papers</h3><p>Generate unlimited practice papers for competitive exams, NCERT, and more.</p></div>
+    <div class="feat-card c6"><div class="feat-icon ic6">💬</div><h3>AI Study Assistant</h3><p>Stuck? Ask our AI chatbot anytime for help, explanations, and study tips.</p></div>
+  </div>
+</section>
+
+<section class="courses-bg" id="courses">
+  <div class="section-label">Popular Courses</div>
+  <div class="section-title">Start Learning Today</div>
+  <div class="section-sub">From school to competitive exams — we have it all, completely free.</div>
+  <div class="courses-grid">
+    <div class="course-card">
+      <div class="course-thumb thumb-purple">NCERT</div>
+      <div class="course-body">
+        <span class="course-tag tag-purple">School</span>
+        <h3>NCERT Class 10 Science</h3>
+        <div class="course-meta"><span>📹 24 Videos</span><span>📝 5 Tests</span></div>
+        <div class="course-progress"><div class="course-progress-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-thumb thumb-green">UPSC</div>
+      <div class="course-body">
+        <span class="course-tag tag-green">Competitive</span>
+        <h3>UPSC Prelims Full Prep</h3>
+        <div class="course-meta"><span>📹 60 Videos</span><span>📝 12 Tests</span></div>
+        <div class="course-progress"><div class="course-progress-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-thumb thumb-orange">CODE</div>
+      <div class="course-body">
+        <span class="course-tag tag-orange">Skill</span>
+        <h3>Python for Beginners</h3>
+        <div class="course-meta"><span>📹 32 Videos</span><span>📝 8 Tests</span></div>
+        <div class="course-progress"><div class="course-progress-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-thumb thumb-blue">JEE</div>
+      <div class="course-body">
+        <span class="course-tag tag-blue">Competitive</span>
+        <h3>JEE Mains Physics</h3>
+        <div class="course-meta"><span>📹 45 Videos</span><span>📝 10 Tests</span></div>
+        <div class="course-progress"><div class="course-progress-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">How It Works</div>
+  <div class="section-title">4 Simple Steps to Your Certificate</div>
+  <div class="section-sub">Simple, honest, and rewarding.</div>
+  <div class="steps">
+    <div class="step"><div class="step-num sn1">1</div><h3>Pick a Course</h3><p>Choose from hundreds of free courses across all subjects.</p></div>
+    <div class="step"><div class="step-num sn2">2</div><h3>Watch Videos</h3><p>Non-skippable lessons. Learn fully, no shortcuts.</p></div>
+    <div class="step"><div class="step-num sn3">3</div><h3>Pass AI Quizzes</h3><p>Answer tough AI-generated questions after each video.</p></div>
+    <div class="step"><div class="step-num sn4">4</div><h3>Get Certified</h3><p>Pass the final exam and download your free certificate!</p></div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Ready to Learn & Get Certified? 🎓</h2>
+  <p>Join thousands of students already learning for free. No credit card. No fees. Ever.</p>
+  <a href="login.html" class="cta-btn">🚀 Join Free Now</a>
+</section>
+
+<footer>
+  <p>Made with ❤️ by <span>Free Cert Hub</span> · 100% Free · AI-Powered Education for Everyone</p>
+</footer>
+
+</body>
+</html>

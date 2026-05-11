@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson — Free Cert Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;600;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Nunito',sans-serif;background:#0f0a1e;color:#f3f4f6;min-height:100vh}
+  :root{
+    --green:#16a34a;--green-light:#dcfce7;
+    --purple:#7c3aed;--purple-light:#ede9fe;
+    --orange:#ea580c;--red:#dc2626;
+    --bg:#0f0a1e;--surface:#1a1030;--card:#221540;--border:#2e1f54;
+  }
+  a{text-decoration:none;color:inherit}
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0.9rem 2rem;background:#13092a;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+  .logo{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:#a78bfa}
+  .logo span{color:#4ade80}
+  .nav-right{display:flex;align-items:center;gap:1rem}
+  .nav-course{font-size:0.8rem;color:#9ca3af;font-weight:600}
+  .nav-course strong{color:#e9d5ff}
+  .nav-progress-wrap{display:flex;align-items:center;gap:0.6rem}
+  .nav-progress-bar{width:120px;height:6px;background:#2e1f54;border-radius:50px;overflow:hidden}
+  .nav-progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#22c55e);border-radius:50px;transition:width 1s ease;width:33%}
+  .nav-pct{font-size:0.8rem;font-weight:800;color:#a78bfa}
+
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:1fr 340px;gap:0;min-height:calc(100vh - 57px)}
+
+  /* VIDEO AREA */
+  .video-area{padding:2rem}
+
+  /* BREADCRUMB */
+  .breadcrumb{font-size:0.8rem;color:#6b7280;margin-bottom:1rem;display:flex;align-items:center;gap:0.4rem}
+  .breadcrumb a{color:#a78bfa;font-weight:700}
+  .breadcrumb a:hover{text-decoration:underline}
+
+  /* VIDEO BOX */
+  .video-box{position:relative;background:#000;border-radius:18px;overflow:hidden;aspect-ratio:16/9;border:2px solid var(--border)}
+  .video-box iframe{width:100%;height:100%;border:none;display:block}
+
+  /* TAB WARNING OVERLAY */
+  .tab-overlay{display:none;position:absolute;inset:0;background:#000000e0;z-index:50;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+  .tab-overlay.show{display:flex}
+  .tab-overlay .warn-icon{font-size:4rem;margin-bottom:1rem;animation:pulse 1s infinite}
+  .tab-overlay h2{font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#fca5a5;margin-bottom:0.5rem}
+  .tab-overlay p{color:#fecaca;font-size:0.95rem;max-width:400px;line-height:1.6;margin-bottom:1.5rem}
+  .tab-overlay .resume-btn{background:var(--purple);color:#fff;border:none;padding:0.7rem 2rem;border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;cursor:pointer;transition:transform .15s}
+  .tab-overlay .resume-btn:hover{transform:scale(1.04)}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+  /* NO SKIP BANNER */
+  .no-skip-banner{display:flex;align-items:center;gap:0.6rem;background:#1e0a3c;border:1px solid #4c1d95;border-radius:12px;padding:0.6rem 1rem;margin-top:0.8rem;font-size:0.82rem;color:#c4b5fd;font-weight:700}
+  .no-skip-banner .dot{width:8px;height:8px;background:#7c3aed;border-radius:50%;animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* VIDEO INFO */
+  .video-info{margin-top:1.5rem}
+  .video-info h1{font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:#f5f3ff;margin-bottom:0.5rem}
+  .video-meta{display:flex;gap:1.2rem;font-size:0.82rem;color:#9ca3af;font-weight:600;flex-wrap:wrap}
+  .video-meta span{display:flex;align-items:center;gap:0.3rem}
+  .desc-box{margin-top:1rem;background:var(--card);border-radius:14px;padding:1.1rem 1.2rem;border:1px solid var(--border);font-size:0.88rem;color:#c4b5fd;line-height:1.7}
+
+  /* QUIZ PROMPT */
+  .quiz-prompt{display:none;margin-top:1.2rem;background:linear-gradient(135deg,#1e1044,#0f2e1a);border:2px solid #16a34a;border-radius:18px;padding:1.5rem;text-align:center}
+  .quiz-prompt.show{display:block;animation:fadeIn .4s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .quiz-prompt h3{font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;color:#4ade80;margin-bottom:0.4rem}
+  .quiz-prompt p{font-size:0.88rem;color:#86efac;margin-bottom:1rem}
+  .quiz-prompt .quiz-btn{background:var(--green);color:#fff;border:none;padding:0.7rem 2rem;border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 14px #16a34a44}
+  .quiz-prompt .quiz-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px #16a34a55}
+
+  /* SIDEBAR */
+  .sidebar{background:#13092a;border-left:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 57px);position:sticky;top:57px}
+  .sidebar-head{padding:1.2rem 1.2rem 0.8rem;border-bottom:1px solid var(--border)}
+  .sidebar-head h2{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:#e9d5ff}
+  .sidebar-head p{font-size:0.78rem;color:#6b7280;font-weight:600;margin-top:0.2rem}
+
+  /* LESSON LIST */
+  .lesson-item{display:flex;align-items:center;gap:0.8rem;padding:0.9rem 1.2rem;border-bottom:1px solid #1a1030;cursor:pointer;transition:background .15s;position:relative}
+  .lesson-item:hover{background:#1a1030}
+  .lesson-item.active{background:#1e0a3c;border-left:3px solid var(--purple)}
+  .lesson-item.done{opacity:0.7}
+  .lesson-item.locked{opacity:0.45;cursor:not-allowed}
+  .lesson-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;flex-shrink:0}
+  .ln-active{background:var(--purple);color:#fff}
+  .ln-done{background:#16a34a;color:#fff}
+  .ln-locked{background:#2e1f54;color:#6b7280}
+  .ln-todo{background:#2e1f54;color:#a78bfa}
+  .lesson-text{flex:1;min-width:0}
+  .lesson-text h4{font-size:0.85rem;font-weight:700;color:#e9d5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lesson-text p{font-size:0.72rem;color:#6b7280;font-weight:600;margin-top:0.1rem}
+  .lesson-badge{font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:50px}
+  .lb-current{background:#4c1d95;color:#c4b5fd}
+  .lb-done{background:#14532d;color:#4ade80}
+  .lb-quiz{background:#1c1917;color:#d97706}
+
+  /* SECTION HEADER in sidebar */
+  .section-header{padding:0.5rem 1.2rem;font-size:0.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#0f0a1e}
+
+  /* TAB COUNT */
+  .tab-count{background:#7c3aed22;border:1px solid #4c1d95;border-radius:10px;padding:0.6rem 1rem;margin:0.8rem;font-size:0.78rem;color:#c4b5fd;font-weight:700;display:flex;align-items:center;gap:0.5rem}
+  .tc-num{font-family:'Baloo 2',cursive;font-size:1.1rem;color:#fca5a5;font-weight:800}
+  #tab-warnings{color:#fca5a5}
+
+  /* RESPONSIVE */
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr}
+    .sidebar{max-height:none;position:static;border-left:none;border-top:1px solid var(--border)}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Free<span>Cert</span>Hub</a>
+  <div class="nav-right">
+    <div class="nav-course">Course: <strong>Python for Beginners</strong></div>
+    <div class="nav-progress-wrap">
+      <div class="nav-progress-bar"><div class="nav-progress-fill" id="course-prog"></div></div>
+      <span class="nav-pct" id="prog-pct">33%</span>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- VIDEO AREA -->
+  <div class="video-area">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a> › <a href="#">Python for Beginners</a> › <span id="lesson-title-bc">Lesson 2: Variables & Data Types</span>
+    </div>
+
+    <div class="video-box">
+      <!-- Replace VIDEO_ID with your actual YouTube video ID -->
+      <iframe
+        id="yt-player"
+        src="https://www.youtube.com/embed/kqtD5dpn9C8?enablejsapi=1&controls=0&disablekb=1&fs=0&rel=0&modestbranding=1&autoplay=1"
+        allow="autoplay; encrypted-media"
+        allowfullscreen
+        title="Lesson Video"
+      ></iframe>
+
+      <!-- TAB SWITCH WARNING -->
+      <div class="tab-overlay" id="tab-overlay">
+        <div class="warn-icon">⚠️</div>
+        <h2>Video Paused!</h2>
+        <p>You left this tab. The video has been paused. You must watch every second — no skipping allowed.</p>
+        <button class="resume-btn" onclick="resumeVideo()">▶ Resume Video</button>
+      </div>
+    </div>
+
+    <div class="no-skip-banner">
+      <div class="dot"></div>
+      This video cannot be skipped. Leaving the tab will pause it automatically.
+    </div>
+
+    <div class="video-info">
+      <h1 id="lesson-title">Lesson 2: Variables & Data Types</h1>
+      <div class="video-meta">
+        <span>📹 Duration: 12:30</span>
+        <span>📚 Python for Beginners</span>
+        <span>🔢 Lesson 2 of 8</span>
+        <span id="watch-status">⏱ Watch time: <strong>0:00</strong></span>
+      </div>
+      <div class="desc-box">
+        In this lesson you'll learn about Python variables, how to name them, and the key data types: strings, integers, floats, and booleans. By the end of this lesson, a quiz will unlock — you must score 70% or above to proceed to the next lesson.
+      </div>
+    </div>
+
+    <!-- QUIZ UNLOCK PROMPT (shows after video ends) -->
+    <div class="quiz-prompt" id="quiz-prompt">
+      <h3>🎉 Lesson Complete! Quiz Unlocked</h3>
+      <p>You've finished the video. Now take the quiz to move to the next lesson. Score 70%+ to pass.</p>
+      <button class="quiz-btn" onclick="window.location.href='quiz.html'">Start Quiz → </button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <h2>📚 Python for Beginners</h2>
+      <p>8 lessons · 3 completed</p>
+    </div>
+
+    <div class="tab-count">
+      <span>⚠️ Tab warnings:</span>
+      <span class="tc-num" id="tab-warnings">0</span>
+      <span>/ 3 (3 = auto fail)</span>
+    </div>
+
+    <div class="section-header">Section 1 — Getting Started</div>
+
+    <div class="lesson-item done" onclick="loadLesson(1)">
+      <div class="lesson-num ln-done">✓</div>
+      <div class="lesson-text"><h4>Lesson 1: Intro to Python</h4><p>8:14 · Completed</p></div>
+      <span class="lesson-badge lb-done">Done</span>
+    </div>
+
+    <div class="lesson-item active">
+      <div class="lesson-num ln-active">2</div>
+      <div class="lesson-text"><h4>Lesson 2: Variables & Data Types</h4><p>12:30 · Watching now</p></div>
+      <span class="lesson-badge lb-current">Now</span>
+    </div>
+
+    <div class="lesson-item done" onclick="loadLesson(3)">
+      <div class="lesson-num ln-done">✓</div>
+      <div class="lesson-text"><h4>Lesson 3: Operators</h4><p>10:02 · Completed</p></div>
+      <span class="lesson-badge lb-done">Done</span>
+    </div>
+
+    <div class="section-header">Section 2 — Core Concepts</div>
+
+    <div class="lesson-item locked">
+      <div class="lesson-num ln-locked">🔒</div>
+      <div class="lesson-text"><h4>Lesson 4: Conditions (if/else)</h4><p>14:20 · Locked</p></div>
+    </div>
+    <div class="lesson-item locked">
+      <div class="lesson-num ln-locked">🔒</div>
+      <div class="lesson-text"><h4>Lesson 5: Loops</h4><p>16:45 · Locked</p></div>
+    </div>
+    <div class="lesson-item locked">
+      <div class="lesson-num ln-locked">🔒</div>
+      <div class="lesson-text"><h4>Lesson 6: Functions</h4><p>18:10 · Locked</p></div>
+    </div>
+
+    <div class="section-header">Section 3 — Final</div>
+
+    <div class="lesson-item locked">
+      <div class="lesson-num ln-locked">🔒</div>
+      <div class="lesson-text"><h4>Lesson 7: Lists & Dicts</h4><p>20:00 · Locked</p></div>
+    </div>
+    <div class="lesson-item locked">
+      <div class="lesson-num ln-locked">🔒</div>
+      <div class="lesson-text"><h4>Lesson 8: Final Project</h4><p>22:30 · Locked</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── TAB VISIBILITY DETECTION ─── */
+  let tabWarnings = 0;
+  const MAX_WARNINGS = 3;
+  let videoPlaying = false;
+  let watchSeconds = 0;
+  let watchTimer = null;
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      pauseVideo();
+      showTabWarning();
+    }
+  });
+
+  window.addEventListener('blur', () => {
+    pauseVideo();
+    showTabWarning();
+  });
+
+  function showTabWarning() {
+    tabWarnings++;
+    document.getElementById('tab-warnings').textContent = tabWarnings;
+    document.getElementById('tab-overlay').classList.add('show');
+    if (tabWarnings >= MAX_WARNINGS) {
+      document.getElementById('tab-overlay').innerHTML = `
+        <div class="warn-icon">❌</div>
+        <h2 style="color:#fca5a5">Auto Fail!</h2>
+        <p style="color:#fecaca">You left the tab 3 times. This attempt has been marked as <strong>FAILED</strong>. Please restart the lesson.</p>
+        <button class="resume-btn" style="background:#dc2626" onclick="window.location.reload()">Restart Lesson</button>
+      `;
+    }
+  }
+
+  function resumeVideo() {
+    if (tabWarnings < MAX_WARNINGS) {
+      document.getElementById('tab-overlay').classList.remove('show');
+      playVideo();
+    }
+  }
+
+  /* ─── YOUTUBE IFRAME API ─── */
+  let player;
+  window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('yt-player', {
+      events: {
+        'onStateChange': onPlayerStateChange,
+        'onReady': onPlayerReady
+      }
+    });
+  };
+
+  // Load YouTube IFrame API
+  const tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+
+  function onPlayerReady(event) {
+    event.target.playVideo();
+    videoPlaying = true;
+    startWatchTimer();
+  }
+
+  function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+      videoPlaying = true;
+      startWatchTimer();
+    } else if (event.data === YT.PlayerState.ENDED) {
+      videoPlaying = false;
+      stopWatchTimer();
+      onVideoComplete();
+    } else {
+      videoPlaying = false;
+      stopWatchTimer();
+    }
+
+    // Prevent seeking (detect skip attempts)
+    if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.PLAYING) {
+      preventSeeking();
+    }
+  }
+
+  let lastTime = 0;
+  function preventSeeking() {
+    if (!player) return;
+    const currentTime = player.getCurrentTime();
+    if (currentTime > lastTime + 3) {
+      player.seekTo(lastTime, true);
+      alert('⚠️ Skipping is not allowed! Watch the full video.');
+    } else {
+      lastTime = currentTime;
+    }
+  }
+
+  // Update lastTime every second to allow normal playback
+  setInterval(() => {
+    if (player && player.getCurrentTime) {
+      const ct = player.getCurrentTime();
+      if (ct <= lastTime + 3) lastTime = ct;
+    }
+  }, 1000);
+
+  function playVideo() {
+    if (player && player.playVideo) {
+      player.playVideo();
+      videoPlaying = true;
+      startWatchTimer();
+    }
+  }
+
+  function pauseVideo() {
+    if (player && player.pauseVideo) {
+      player.pauseVideo();
+      videoPlaying = false;
+      stopWatchTimer();
+    }
+  }
+
+  /* ─── WATCH TIMER ─── */
+  function startWatchTimer() {
+    if (watchTimer) return;
+    watchTimer = setInterval(() => {
+      watchSeconds++;
+      const m = Math.floor(watchSeconds / 60);
+      const s = watchSeconds % 60;
+      document.getElementById('watch-status').innerHTML =
+        `⏱ Watch time: <strong>${m}:${s.toString().padStart(2,'0')}</strong>`;
+    }, 1000);
+  }
+
+  function stopWatchTimer() {
+    clearInterval(watchTimer);
+    watchTimer = null;
+  }
+
+  /* ─── VIDEO COMPLETE ─── */
+  function onVideoComplete() {
+    document.getElementById('quiz-prompt').classList.add('show');
+    document.getElementById('quiz-prompt').scrollIntoView({behavior:'smooth'});
+  }
+
+  /* ─── LESSON CLICK (locked ones) ─── */
+  function loadLesson(n) {
+    // In a real app this would load the lesson from DB
+    alert(`Navigating to lesson ${n}. In a real app, this loads from your backend.`);
+  }
+
+  // Demo: show quiz after 10 seconds for testing purposes
+  // Remove this in production
+  setTimeout(() => {
+    // onVideoComplete(); // Uncomment to test quiz prompt
+  }, 10000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — Free Cert Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --purple: #7c3aed; --green: #16a34a; --red: #dc2626; --bg: #f5f3ff; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: #1a1a2e; margin: 0; padding: 0; user-select: none; }
+  nav { background: #fff; padding: 1rem 2rem; border-bottom: 2px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Baloo 2', cursive; font-size: 1.5rem; color: var(--purple); font-weight: 800; }
+  
+  .quiz-container { max-width: 800px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+  .timer-bar { height: 8px; background: #e5e7eb; border-radius: 10px; margin-bottom: 2rem; overflow: hidden; }
+  .timer-fill { height: 100%; background: var(--purple); width: 100%; transition: width 1s linear; }
+  
+  .question-box h2 { font-family: 'Baloo 2', cursive; margin-bottom: 1.5rem; }
+  .options { display: grid; gap: 1rem; }
+  .option { padding: 1rem; border: 2px solid #e5e7eb; border-radius: 15px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+  .option:hover { border-color: var(--purple); background: #f5f3ff; }
+  .option.selected { border-color: var(--purple); background: var(--purple); color: #fff; }
+  
+  .descriptive-box { margin-top: 2rem; }
+  textarea { width: 100%; height: 150px; padding: 1rem; border-radius: 15px; border: 2px solid #e5e7eb; font-family: inherit; resize: none; }
+  
+  .warning-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--red); color: #fff; padding: 1rem 2rem; border-radius: 50px; font-weight: 800; display: none; z-index: 1000; }
+  .btn-next { margin-top: 2rem; background: var(--green); color: #fff; border: none; padding: 1rem 3rem; border-radius: 50px; font-weight: 900; cursor: pointer; float: right; }
+</style>
+</head>
+<body oncontextmenu="return false"> <!-- Disable Right Click -->
+
+<div class="warning-toast" id="cheat-warn">⚠️ CHEAT DETECTED! DO NOT COPY/PASTE OR LEAVE TAB!</div>
+
+<nav>
+  <div class="logo">FreeCert<span>Hub</span></div>
+  <div id="cheat-count">Warnings: 0/3</div>
+</nav>
+
+<div class="quiz-container">
+  <div class="timer-bar"><div class="timer-fill" id="timer"></div></div>
+  
+  <div id="quiz-content">
+    <div class="question-box">
+      <p style="color: var(--purple); font-weight: 800;">Question 1 of 5</p>
+      <h2>What is the primary purpose of a Python "Variable"?</h2>
+      <div class="options">
+        <div class="option" onclick="selectOption(this)">To delete data permanently</div>
+        <div class="option" onclick="selectOption(this)">To store data values in memory</div>
+        <div class="option" onclick="selectOption(this)">To make the computer run faster</div>
+        <div class="option" onclick="selectOption(this)">To connect to the internet</div>
+      </div>
+    </div>
+
+    <div class="descriptive-box">
+      <h2>Written Task: Explain why AI detection is important in online learning.</h2>
+      <textarea id="written-answer" placeholder="Write your answer here... (Min 50 words). Our AI will analyze your writing style for plagiarism." onpaste="return false"></textarea>
+    </div>
+
+    <button class="btn-next" onclick="submitQuiz()">Submit Test & Get Marks</button>
+  </div>
+</div>
+
+<script>
+  let warnings = 0;
+
+  // 1. Detect Copy/Paste
+  document.addEventListener('copy', (e) => { e.preventDefault(); triggerWarning(); });
+  document.addEventListener('paste', (e) => { e.preventDefault(); triggerWarning(); });
+
+  // 2. Detect Tab Switch
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) triggerWarning();
+  });
+
+  function triggerWarning() {
+    warnings++;
+    document.getElementById('cheat-warn').style.display = 'block';
+    document.getElementById('cheat-count').innerText = `Warnings: ${warnings}/3`;
+    
+    if (warnings >= 3) {
+      alert("FAIL: You have been disqualified for cheating attempts.");
+      window.location.href = "index.html";
+    }
+    setTimeout(() => { document.getElementById('cheat-warn').style.display = 'none'; }, 3000);
+  }
+
+  function selectOption(el) {
+    document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function submitQuiz() {
+    const written = document.getElementById('written-answer').value;
+    if(written.length < 20) {
+        alert("Please write a proper answer before submitting.");
+        return;
+    }
+    // Logic to save marks and redirect to dashboard
+    window.location.href = "dashboard.html";
+  }
+</script>
+</body>
+</html>
