@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://zxyonghscdnhtiusmybz.supabase.co'; // 👈 replace
+  const SUPABASE_KEY = 'sb_publishable_L4NFZoFY2SP9-tNQaazeBw_m1FE4Np_';           // 👈 replace
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<title>Dashboard — Free Cert Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --purple:#7c3aed;--purple-light:#ede9fe;--purple-dark:#5b21b6;
+    --green:#16a34a;--green-light:#dcfce7;
+    --orange:#ea580c;--orange-light:#ffedd5;
+    --blue:#2563eb;--blue-light:#dbeafe;
+    --red:#dc2626;--red-light:#fee2e2;
+    --gold:#d97706;--gold-light:#fef3c7;
+    --bg:#f0f2f8;--surface:#fff;--border:#e5e7eb;
+    --text:#1a1a2e;--muted:#6b7280;
+  }
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+  a{text-decoration:none;color:inherit}
+  .sidebar{width:260px;background:var(--surface);border-right:2px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+  .sidebar-logo{padding:1.5rem 1.5rem 1rem;border-bottom:2px solid var(--border)}
+  .logo{font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:var(--purple)}
+  .logo span{color:var(--green)}
+  .sidebar-user{padding:1.2rem 1.5rem;display:flex;align-items:center;gap:0.8rem;border-bottom:2px solid var(--border)}
+  .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;flex-shrink:0}
+  .user-info h4{font-size:0.9rem;font-weight:800}
+  .user-info p{font-size:0.75rem;color:var(--muted);font-weight:600}
+  .online-badge{display:inline-flex;align-items:center;gap:0.3rem;font-size:0.68rem;font-weight:700;color:var(--green);margin-top:0.1rem}
+  .online-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  .sidebar-nav{padding:1rem 0.8rem;flex:1}
+  .nav-section{font-size:0.68rem;font-weight:800;letter-spacing:.1em;color:#9ca3af;text-transform:uppercase;padding:0.5rem 0.7rem;margin-top:0.5rem}
+  .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0.8rem;border-radius:14px;font-weight:700;font-size:0.88rem;color:var(--muted);cursor:pointer;transition:all .15s;margin-bottom:0.15rem;border:none;background:none;width:100%;font-family:'Nunito',sans-serif;text-align:left}
+  .nav-item:hover{background:var(--purple-light);color:var(--purple)}
+  .nav-item.active{background:var(--purple);color:#fff}
+  .nav-item .icon{font-size:1.1rem;width:22px;text-align:center}
+  .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:0.65rem;font-weight:800;padding:0.15rem 0.45rem;border-radius:50px}
+  .nav-badge.green{background:var(--green)}
+  .sidebar-bottom{padding:1rem 0.8rem;border-top:2px solid var(--border)}
+  .logout-btn{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0.8rem;border-radius:14px;font-weight:700;font-size:0.88rem;color:var(--red);cursor:pointer;transition:background .15s;width:100%;border:none;background:none;font-family:'Nunito',sans-serif}
+  .logout-btn:hover{background:var(--red-light)}
+  .main{margin-left:260px;flex:1;display:flex;flex-direction:column}
+  .topbar{background:#fff;border-bottom:2px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .topbar-title h2{font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800}
+  .topbar-title p{font-size:0.8rem;color:var(--muted);font-weight:600}
+  .topbar-right{display:flex;align-items:center;gap:1rem}
+  .streak-pill{display:flex;align-items:center;gap:0.4rem;background:var(--gold-light);color:var(--gold);padding:0.4rem 0.9rem;border-radius:50px;font-weight:800;font-size:0.85rem}
+  .notif-btn{width:38px;height:38px;border-radius:12px;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;position:relative}
+  .notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff}
+  .content{padding:2rem;flex:1}
+  .welcome-banner{background:linear-gradient(135deg,var(--purple),#a855f7);border-radius:24px;padding:1.8rem 2rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative}
+  .welcome-banner::before{content:'🎓';position:absolute;right:200px;top:50%;transform:translateY(-50%);font-size:6rem;opacity:.1}
+  .welcome-text h2{font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:0.3rem}
+  .welcome-text p{color:#e9d5ff;font-size:0.9rem;font-weight:600;max-width:400px;line-height:1.5}
+  .welcome-btn{background:#fff;color:var(--purple);padding:0.65rem 1.5rem;border-radius:50px;font-weight:800;font-size:0.9rem;white-space:nowrap;flex-shrink:0;transition:transform .15s;display:inline-block;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+  .welcome-btn:hover{transform:scale(1.04)}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem}
+  .stat-card{background:#fff;border-radius:20px;padding:1.4rem;border:2px solid var(--border);transition:transform .2s}
+  .stat-card:hover{transform:translateY(-3px)}
+  .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem}
+  .stat-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+  .si-purple{background:var(--purple-light)}.si-green{background:var(--green-light)}.si-orange{background:var(--orange-light)}.si-blue{background:var(--blue-light)}
+  .stat-change{font-size:0.72rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:50px;background:#dcfce7;color:#16a34a}
+  .stat-val{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;line-height:1}
+  .stat-label{font-size:0.8rem;color:var(--muted);font-weight:600;margin-top:0.2rem}
+  .two-col{display:grid;grid-template-columns:1fr 340px;gap:1.5rem;margin-bottom:2rem}
+  .section-card{background:#fff;border-radius:20px;padding:1.5rem;border:2px solid var(--border)}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+  .section-head h3{font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800}
+  .see-all{font-size:0.8rem;font-weight:700;color:var(--purple);cursor:pointer}
+  .course-row{display:flex;align-items:center;gap:1rem;padding:0.9rem 0;border-bottom:1px solid var(--border)}
+  .course-row:last-child{border-bottom:none}
+  .course-thumb-sm{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-family:'Baloo 2',cursive;flex-shrink:0;font-size:0.75rem}
+  .ct-purple{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+  .ct-green{background:linear-gradient(135deg,#16a34a,#22c55e)}
+  .ct-orange{background:linear-gradient(135deg,#ea580c,#f97316)}
+  .ct-blue{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+  .course-info{flex:1;min-width:0}
+  .course-info h4{font-size:0.88rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .course-info p{font-size:0.75rem;color:var(--muted);font-weight:600;margin-top:0.15rem}
+  .progress-row{display:flex;align-items:center;gap:0.5rem;margin-top:0.4rem}
+  .prog-bar{flex:1;height:5px;background:var(--border);border-radius:50px;overflow:hidden}
+  .prog-fill{height:100%;border-radius:50px}
+  .pf-purple{background:linear-gradient(90deg,#7c3aed,#a855f7)}
+  .pf-green{background:linear-gradient(90deg,#16a34a,#22c55e)}
+  .pf-orange{background:linear-gradient(90deg,#ea580c,#f97316)}
+  .pf-blue{background:linear-gradient(90deg,#2563eb,#3b82f6)}
+  .prog-pct{font-size:0.72rem;font-weight:800;color:var(--muted);white-space:nowrap}
+  .continue-btn{background:var(--purple-light);color:var(--purple);padding:0.35rem 0.8rem;border-radius:50px;font-size:0.75rem;font-weight:800;border:none;cursor:pointer;flex-shrink:0;transition:background .15s;font-family:'Nunito',sans-serif}
+  .continue-btn:hover{background:var(--purple);color:#fff}
+  .activity-item{display:flex;align-items:flex-start;gap:0.8rem;padding:0.75rem 0;border-bottom:1px solid var(--border)}
+  .activity-item:last-child{border-bottom:none}
+  .act-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0}
+  .act-text h4{font-size:0.83rem;font-weight:700;line-height:1.3}
+  .act-text p{font-size:0.72rem;color:var(--muted);font-weight:600;margin-top:0.1rem}
+  .lb-row{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 0;border-bottom:1px solid var(--border)}
+  .lb-row:last-child{border-bottom:none}
+  .lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;flex-shrink:0}
+  .r1{background:#fbbf24;color:#fff}.r2{background:#9ca3af;color:#fff}.r3{background:#cd7c2f;color:#fff}.rn{background:var(--bg);color:var(--muted)}
+  .lb-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:0.75rem;flex-shrink:0}
+  .lb-name{flex:1;font-size:0.85rem;font-weight:700}
+  .lb-score{font-size:0.8rem;font-weight:800;color:var(--purple)}
+  .lb-row.me{background:var(--purple-light);margin:0 -0.5rem;padding:0.7rem 0.5rem;border-radius:10px}
+  .lb-row.me .lb-name{color:var(--purple)}
+  .certs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-bottom:2rem}
+  .cert-card{background:#fff;border-radius:20px;border:2px solid var(--border);overflow:hidden;transition:transform .2s}
+  .cert-card:hover{transform:translateY(-3px)}
+  .cert-banner{height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem}
+  .cb-purple{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+  .cb-green{background:linear-gradient(135deg,#16a34a,#22c55e)}
+  .cert-body{padding:1.1rem}
+  .cert-body h4{font-weight:800;font-size:0.92rem;margin-bottom:0.25rem}
+  .cert-body p{font-size:0.75rem;color:var(--muted);font-weight:600}
+  .cert-footer{display:flex;align-items:center;justify-content:space-between;margin-top:0.8rem}
+  .cert-score{font-size:0.75rem;font-weight:700;color:var(--green)}
+  .cert-dl-btn{background:var(--purple);color:#fff;padding:0.35rem 0.8rem;border-radius:50px;font-size:0.75rem;font-weight:800;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+  .locked-cert{background:#fff;border-radius:20px;border:2px dashed var(--border);padding:1.5rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:0.5rem}
+  .locked-cert p{font-size:0.82rem;font-weight:700;color:var(--muted)}
+  .locked-cert small{font-size:0.72rem;color:#9ca3af}
+  .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+  .quick-card{background:#fff;border-radius:18px;border:2px solid var(--border);padding:1.2rem;text-align:center;cursor:pointer;transition:all .2s}
+  .quick-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+  .quick-icon{font-size:1.8rem;margin-bottom:0.5rem}
+  .quick-card h4{font-size:0.82rem;font-weight:800}
+  .quick-card p{font-size:0.72rem;color:var(--muted);margin-top:0.15rem}
+  .score-row{display:flex;align-items:center;gap:1rem;padding:0.85rem 0;border-bottom:1px solid var(--border)}
+  .score-row:last-child{border-bottom:none}
+  .score-badge{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.85rem;flex-shrink:0;font-family:'Baloo 2',cursive}
+  .sb-pass{background:var(--green-light);color:var(--green)}
+  .sb-fail{background:var(--red-light);color:var(--red)}
+  .sb-pending{background:var(--gold-light);color:var(--gold)}
+  .score-info{flex:1}
+  .score-info h4{font-size:0.85rem;font-weight:800}
+  .score-info p{font-size:0.73rem;color:var(--muted);font-weight:600;margin-top:0.1rem}
+  .score-tag{font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:50px;white-space:nowrap}
+  .tag-pass{background:var(--green-light);color:var(--green)}
+  .tag-fail{background:var(--red-light);color:var(--red)}
+  .tag-pending{background:var(--gold-light);color:var(--gold)}
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><a href="index.html" class="logo">Free<span>Cert</span>Hub</a></div>
+  <div class="sidebar-user">
+    <div class="avatar">S</div>
+    <div class="user-info">
+      <h4>Student</h4>
+      <p>student@freecerthub.com</p>
+      <div class="online-badge"><div class="online-dot"></div> Online</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <button class="nav-item active" onclick="showSection('overview',this)"><span class="icon">🏠</span> Dashboard</button>
+    <a href="lesson.html" class="nav-item"><span class="icon">🎬</span> My Courses <span class="nav-badge green">4</span></a>
+    <div class="nav-section">Learning</div>
+    <a href="quiz.html" class="nav-item"><span class="icon">📝</span> Quizzes</a>
+    <a href="exam.html" class="nav-item"><span class="icon">🏆</span> Final Exams <span class="nav-badge">1</span></a>
+    <a href="generator.html" class="nav-item"><span class="icon">✨</span> Question Generator</a>
+    <div class="nav-section">Achievements</div>
+    <button class="nav-item" onclick="showSection('certs',this)"><span class="icon">📜</span> My Certificates</button>
+    <button class="nav-item" onclick="showSection('scores',this)"><span class="icon">📊</span> Exam History</button>
+    <div class="nav-section">Support</div>
+    <a href="tutor.html" class="nav-item"><span class="icon">🤖</span> AI Tutor</a>
+    <button class="nav-item" onclick="showSection('settings',this)"><span class="icon">⚙️</span> Settings</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title">
+      <h2 id="page-title">My Dashboard</h2>
+      <p id="page-sub">Welcome back! Keep up the great work 🚀</p>
+    </div>
+    <div class="topbar-right">
+      <div class="streak-pill">🔥 7 Day Streak</div>
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div id="section-overview">
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Good day, Student! 👋</h2>
+          <p>You're 65% through Python for Beginners. Just 7 more lessons to unlock your certificate!</p>
+        </div>
+        <button class="welcome-btn" onclick="window.location.href='lesson.html'">Continue Learning →</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon si-purple">📚</div><span class="stat-change">+1 this week</span></div><div class="stat-val">4</div><div class="stat-label">Courses Enrolled</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon si-green">📜</div><span class="stat-change">+1 this month</span></div><div class="stat-val">1</div><div class="stat-label">Certificates Earned</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon si-orange">🎯</div><span class="stat-change">↑ from 81%</span></div><div class="stat-val">88%</div><div class="stat-label">Avg Exam Score</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon si-blue">⏱️</div><span class="stat-change">+2h this week</span></div><div class="stat-val">24h</div><div class="stat-label">Total Study Time</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="section-card">
+          <div class="section-head"><h3>📚 Course Progress</h3><a href="lesson.html" class="see-all">View All →</a></div>
+          <div class="course-row">
+            <div class="course-thumb-sm ct-orange">PY</div>
+            <div class="course-info"><h4>Python for Beginners</h4><p>13/20 lessons completed</p><div class="progress-row"><div class="prog-bar"><div class="prog-fill pf-orange" style="width:65%"></div></div><span class="prog-pct">65%</span></div></div>
+            <button class="continue-btn" onclick="window.location.href='lesson.html'">Continue</button>
+          </div>
+          <div class="course-row">
+            <div class="course-thumb-sm ct-purple">UPSC</div>
+            <div class="course-info"><h4>UPSC Prelims Full Prep</h4><p>8/60 lessons completed</p><div class="progress-row"><div class="prog-bar"><div class="prog-fill pf-purple" style="width:13%"></div></div><span class="prog-pct">13%</span></div></div>
+            <button class="continue-btn" onclick="window.location.href='lesson.html'">Continue</button>
+          </div>
+          <div class="course-row">
+            <div class="course-thumb-sm ct-green">NCRT</div>
+            <div class="course-info"><h4>NCERT Class 10 Science</h4><p>24/24 lessons ✅ Complete!</p><div class="progress-row"><div class="prog-bar"><div class="prog-fill pf-green" style="width:100%"></div></div><span class="prog-pct">100%</span></div></div>
+            <button class="continue-btn" onclick="window.location.href='exam.html'" style="background:var(--green-light);color:var(--green)">Take Exam</button>
+          </div>
+          <div class="course-row">
+            <div class="course-thumb-sm ct-blue">JEE</div>
+            <div class="course-info"><h4>JEE Mains Physics</h4><p>3/45 lessons completed</p><div class="progress-row"><div class="prog-bar"><div class="prog-fill pf-blue" style="width:7%"></div></div><span class="prog-pct">7%</span></div></div>
+            <button class="continue-btn" onclick="window.location.href='lesson.html'">Continue</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:1.5rem">
+          <div class="section-card">
+            <div class="section-head"><h3>⚡ Recent Activity</h3></div>
+            <div class="activity-item"><div class="act-icon si-green">✅</div><div class="act-text"><h4>Quiz Passed — Python Lesson 13</h4><p>Score: 90% · 2 hours ago</p></div></div>
+            <div class="activity-item"><div class="act-icon si-orange">🎬</div><div class="act-text"><h4>Video Watched — Functions & Loops</h4><p>Duration: 18 mins · Today</p></div></div>
+            <div class="activity-item"><div class="act-icon si-purple">📜</div><div class="act-text"><h4>Certificate Earned — AI Intro</h4><p>Final score: 92% · Yesterday</p></div></div>
+            <div class="activity-item"><div class="act-icon si-blue">🏆</div><div class="act-text"><h4>Final Exam Attempted — NCERT</h4><p>Score: 88% · 2 days ago</p></div></div>
+          </div>
+          <div class="section-card">
+            <div class="section-head"><h3>🏆 Top Learners</h3><span class="see-all">This Week</span></div>
+            <div class="lb-row"><div class="lb-rank r1">1</div><div class="lb-av" style="background:#7c3aed">R</div><div class="lb-name">Rahul K.</div><div class="lb-score">97%</div></div>
+            <div class="lb-row"><div class="lb-rank r2">2</div><div class="lb-av" style="background:#16a34a">P</div><div class="lb-name">Priya M.</div><div class="lb-score">94%</div></div>
+            <div class="lb-row"><div class="lb-rank r3">3</div><div class="lb-av" style="background:#ea580c">A</div><div class="lb-name">Arjun S.</div><div class="lb-score">91%</div></div>
+            <div class="lb-row me"><div class="lb-rank rn">5</div><div class="lb-av" style="background:#2563eb">S</div><div class="lb-name">You 👈</div><div class="lb-score">88%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;margin-bottom:1rem">⚡ Quick Actions</h3>
+      <div class="quick-grid">
+        <div class="quick-card" onclick="window.location.href='lesson.html'"><div class="quick-icon">🎬</div><h4>Resume Lesson</h4><p>Python Lesson 14</p></div>
+        <div class="quick-card" onclick="window.location.href='exam.html'"><div class="quick-icon">🏆</div><h4>Take Final Exam</h4><p>NCERT Science ready!</p></div>
+        <div class="quick-card" onclick="window.location.href='generator.html'"><div class="quick-icon">✨</div><h4>Generate Paper</h4><p>Unlimited questions</p></div>
+        <div class="quick-card" onclick="window.location.href='tutor.html'"><div class="quick-icon">🤖</div><h4>Ask AI Tutor</h4><p>Get instant help</p></div>
+      </div>
+    </div>
+
+    <!-- CERTIFICATES -->
+    <div id="section-certs" style="display:none">
+      <h3 style="font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;margin-bottom:1.5rem">📜 My Certificates</h3>
+      <div class="certs-grid">
+        <div class="cert-card"><div class="cert-banner cb-green">🏅</div><div class="cert-body"><h4>Introduction to AI & Prompt Engineering</h4><p>Completed: May 2, 2026</p><div class="cert-footer"><span class="cert-score">✅ Score: 92%</span><button class="cert-dl-btn" onclick="window.location.href='certificate.html'">Download PDF</button></div></div></div>
+        <div class="locked-cert"><div style="font-size:2rem">🔒</div><p>Python for Beginners</p><small>Complete all videos + pass final exam</small><div style="margin-top:0.5rem;background:var(--border);border-radius:50px;height:5px;width:100%"><div style="width:65%;height:5px;background:var(--orange);border-radius:50px"></div></div><small style="color:var(--orange);font-weight:700">65% complete</small></div>
+        <div class="locked-cert"><div style="font-size:2rem">🔒</div><p>UPSC Prelims Full Prep</p><small>Complete all videos + pass final exam</small><div style="margin-top:0.5rem;background:var(--border);border-radius:50px;height:5px;width:100%"><div style="width:13%;height:5px;background:var(--purple);border-radius:50px"></div></div><small style="color:var(--purple);font-weight:700">13% complete</small></div>
+        <div class="locked-cert"><div style="font-size:2rem">🔒</div><p>JEE Mains Physics</p><small>Complete all videos + pass final exam</small><div style="margin-top:0.5rem;background:var(--border);border-radius:50px;height:5px;width:100%"><div style="width:7%;height:5px;background:var(--blue);border-radius:50px"></div></div><small style="color:var(--blue);font-weight:700">7% complete</small></div>
+      </div>
+    </div>
+
+    <!-- EXAM HISTORY -->
+    <div id="section-scores" style="display:none">
+      <h3 style="font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;margin-bottom:1.5rem">📊 Exam History</h3>
+      <div class="section-card">
+        <div class="score-row"><div class="score-badge sb-pass">92%</div><div class="score-info"><h4>AI & Prompt Engineering — Final Exam</h4><p>MCQ: 18/20 · Descriptive: 74/80 · Cheats: 0 · May 2, 2026</p></div><span class="score-tag tag-pass">PASSED ✅</span></div>
+        <div class="score-row"><div class="score-badge sb-pass">88%</div><div class="score-info"><h4>NCERT Science — Final Exam</h4><p>MCQ: 16/20 · Descriptive: 72/80 · Cheats: 0 · May 5, 2026</p></div><span class="score-tag tag-pass">PASSED ✅</span></div>
+        <div class="score-row"><div class="score-badge sb-pass">90%</div><div class="score-info"><h4>Python Lesson 13 Quiz</h4><p>MCQ: 9/10 · Descriptive: 81/90 · Today</p></div><span class="score-tag tag-pass">PASSED ✅</span></div>
+        <div class="score-row"><div class="score-badge sb-fail">0%</div><div class="score-info"><h4>UPSC Prelims — Quiz 3</h4><p>⚠️ Disqualified: 3 tab switches detected</p></div><span class="score-tag tag-fail">FAILED ❌</span></div>
+        <div class="score-row"><div class="score-badge sb-pending">—</div><div class="score-info"><h4>Python for Beginners — Final Exam</h4><p>Unlocks after completing all 20 lessons</p></div><span class="score-tag tag-pending">PENDING ⏳</span></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="section-settings" style="display:none">
+      <h3 style="font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;margin-bottom:1.5rem">⚙️ Settings</h3>
+      <div class="section-card" style="max-width:560px">
+        <div style="margin-bottom:1.2rem"><label style="font-weight:800;font-size:0.85rem;display:block;margin-bottom:0.4rem">Full Name</label><input type="text" value="Student" style="width:100%;padding:0.75rem 1rem;border:2px solid var(--border);border-radius:14px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none"></div>
+        <div style="margin-bottom:1.2rem"><label style="font-weight:800;font-size:0.85rem;display:block;margin-bottom:0.4rem">Email Address</label><input type="email" value="student@freecerthub.com" style="width:100%;padding:0.75rem 1rem;border:2px solid var(--border);border-radius:14px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none"></div>
+        <button onclick="alert('✅ Profile saved!')" style="background:var(--purple);color:#fff;border:none;padding:0.75rem 2rem;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer">Save Changes</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ─── SUPABASE: Load real data on page start ───────────
+  (async () => {
+    // 1. Check if user is logged in — if not, send to login
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    // 2. Load profile (name, avatar)
+    const { data: profile } = await db
+      .from('profiles').select('*').eq('id', user.id).single();
+
+    if (profile?.full_name) {
+      const firstName = profile.full_name.split(' ')[0];
+      document.querySelector('.user-info h4').textContent   = profile.full_name;
+      document.querySelector('.user-info p').textContent    = user.email;
+      document.querySelector('.avatar').textContent         = profile.full_name[0].toUpperCase();
+      document.querySelector('.welcome-text h2').textContent = 'Good day, ' + firstName + '! 👋';
+    }
+
+    // 3. Load scores
+    const { data: scores } = await db
+      .from('scores').select('*').eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    // 4. Load certificates
+    const { data: certs } = await db
+      .from('certificates').select('*').eq('user_id', user.id);
+
+    // 5. Load progress
+    const { data: progressData } = await db
+      .from('progress').select('*').eq('user_id', user.id);
+
+    // 6. Update stat cards with real numbers
+    const statVals = document.querySelectorAll('.stat-val');
+    if (statVals.length >= 4) {
+      statVals[0].textContent = progressData?.length || '0';       // courses enrolled
+      statVals[1].textContent = certs?.length        || '0';       // certificates
+      if (scores?.length) {
+        const avg = Math.round(scores.reduce((s,r) => s + r.total_score, 0) / scores.length);
+        statVals[2].textContent = avg + '%';                        // avg score
+      }
+    }
+
+    // 7. Build real exam history in scores section
+    if (scores?.length) {
+      const scoreContainer = document.querySelector('#section-scores .section-card');
+      if (scoreContainer) {
+        scoreContainer.innerHTML = scores.map(s => `
+          <div class="score-row">
+            <div class="score-badge ${s.passed ? 'sb-pass' : 'sb-fail'}">${s.total_score}%</div>
+            <div class="score-info">
+              <h4>${s.course_name} — ${s.quiz_type === 'final_exam' ? 'Final Exam' : 'Quiz ' + (s.lesson_num || '')}</h4>
+              <p>MCQ: ${s.mcq_score} · Written: ${s.desc_score} · Warnings: ${s.warnings} · ${new Date(s.created_at).toLocaleDateString('en-IN')}</p>
+            </div>
+            <span class="score-tag ${s.passed ? 'tag-pass' : 'tag-fail'}">${s.passed ? 'PASSED ✅' : 'FAILED ❌'}</span>
+          </div>`).join('');
+      }
+    }
+
+    // 8. Build real certificates section
+    if (certs?.length) {
+      const certGrid = document.querySelector('#section-certs .certs-grid');
+      if (certGrid) {
+        const earned = certs.map(c => `
+          <div class="cert-card">
+            <div class="cert-banner cb-green">🏅</div>
+            <div class="cert-body">
+              <h4>${c.course_name}</h4>
+              <p>Issued: ${new Date(c.issued_at).toLocaleDateString('en-IN')} · ID: ${c.cert_code || 'FCH-CERT'}</p>
+              <div class="cert-footer">
+                <span class="cert-score">✅ Score: ${c.final_score}%</span>
+                <button class="cert-dl-btn" onclick="window.location.href='certificate.html'">Download PDF</button>
+              </div>
+            </div>
+          </div>`).join('');
+        certGrid.innerHTML = earned;
+      }
+    }
+  })();
+
+  // ─── LOGOUT with Supabase ─────────────────────────────
+  async function handleLogout() {
+    await db.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  function showSection(name, el) {
+    ['overview','certs','scores','settings'].forEach(s => {
+      document.getElementById('section-'+s).style.display = 'none';
+    });
+    document.getElementById('section-'+name).style.display = 'block';
+    const titles = {
+      overview:['My Dashboard','Welcome back! Keep up the great work 🚀'],
+      certs:['My Certificates','Download and share your earned certificates'],
+      scores:['Exam History','Track all your quiz and exam scores'],
+      settings:['Settings','Update your profile and preferences']
+    };
+    document.getElementById('page-title').textContent = titles[name][0];
+    document.getElementById('page-sub').textContent = titles[name][1];
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    if(el) el.classList.add('active');
+  }
+</script>
+</body>
+</html>
