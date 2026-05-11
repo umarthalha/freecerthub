@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Question Generator — Free Cert Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--purple:#7c3aed;--purple-light:#ede9fe;--green:#16a34a;--green-light:#dcfce7;--orange:#ea580c;--orange-light:#ffedd5;--blue:#2563eb;--blue-light:#dbeafe;--bg:#f8fafc;--border:#e5e7eb;--text:#1a1a2e;--muted:#6b7280}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);margin:0}
+  a{text-decoration:none;color:inherit}
+
+  nav{background:#fff;padding:1rem 2rem;border-bottom:2px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+  .logo{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:var(--purple)}
+  .logo span{color:var(--green)}
+  .nav-right{display:flex;gap:0.8rem;align-items:center}
+  .nav-link{font-size:0.85rem;font-weight:700;color:var(--muted);transition:color .2s}
+  .nav-link:hover{color:var(--purple)}
+  .nav-btn{background:var(--purple);color:#fff;padding:0.45rem 1.1rem;border-radius:50px;font-size:0.85rem;font-weight:700}
+
+  .container{max-width:960px;margin:2rem auto;padding:0 1.5rem}
+
+  /* CONFIG CARD */
+  .config-card{background:#fff;border-radius:24px;padding:2rem;border:2px solid var(--border);margin-bottom:1.5rem}
+  .card-header{margin-bottom:1.5rem}
+  .card-header h2{font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:var(--purple);margin-bottom:0.3rem}
+  .card-header p{font-size:0.88rem;color:var(--muted);font-weight:600}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem}
+  label{display:block;font-weight:800;font-size:0.82rem;color:#374151;margin-bottom:0.4rem}
+  select,input[type="number"],input[type="text"]{width:100%;padding:0.75rem 1rem;border-radius:12px;border:2px solid var(--border);font-family:'Nunito',sans-serif;font-size:0.92rem;font-weight:600;color:var(--text);outline:none;transition:border .2s;background:#fafafa}
+  select:focus,input:focus{border-color:var(--purple);background:#fff}
+  textarea.topic-input{width:100%;padding:0.75rem 1rem;border-radius:12px;border:2px solid var(--border);font-family:'Nunito',sans-serif;font-size:0.92rem;font-weight:600;color:var(--text);outline:none;transition:border .2s;resize:none;height:70px;background:#fafafa}
+  textarea.topic-input:focus{border-color:var(--purple);background:#fff}
+
+  .gen-btn{width:100%;margin-top:1.5rem;background:linear-gradient(135deg,var(--purple),#a855f7);color:#fff;border:none;padding:1.1rem;border-radius:50px;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;font-family:'Nunito',sans-serif;box-shadow:0 4px 16px #7c3aed33}
+  .gen-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px #7c3aed44}
+  .gen-btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* HISTORY */
+  .history-chips{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1.2rem}
+  .history-chip{background:var(--purple-light);color:var(--purple);padding:0.3rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:700;cursor:pointer;transition:.15s;border:none;font-family:'Nunito',sans-serif}
+  .history-chip:hover{background:var(--purple);color:#fff}
+
+  /* AI LOADING */
+  .ai-loading{display:none;background:#fff;border-radius:24px;padding:2.5rem;border:2px solid var(--border);text-align:center;margin-bottom:1.5rem}
+  .ai-loading.show{display:block}
+  .ai-progress{width:100%;height:6px;background:var(--border);border-radius:50px;overflow:hidden;margin:1.2rem 0}
+  .ai-progress-bar{height:100%;background:linear-gradient(90deg,var(--purple),#a855f7,var(--green));border-radius:50px;animation:progress 3s ease-in-out forwards}
+  @keyframes progress{0%{width:0%}60%{width:70%}100%{width:95%}}
+  .ai-loading h3{font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;color:var(--purple);margin-bottom:0.4rem}
+  .ai-steps-list{display:flex;flex-direction:column;gap:0.4rem;margin-top:1rem;text-align:left;max-width:360px;margin-left:auto;margin-right:auto}
+  .ai-step-item{font-size:0.82rem;font-weight:700;color:#9ca3af;display:flex;align-items:center;gap:0.5rem;transition:color .3s}
+  .ai-step-item.done{color:var(--green)}
+  .ai-step-item.active{color:var(--purple)}
+
+  /* PAPER */
+  .paper-card{display:none;background:#fff;border-radius:24px;border:2px solid var(--border);margin-bottom:1.5rem;overflow:hidden}
+  .paper-card.show{display:block}
+  .paper-toolbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:var(--purple);color:#fff;flex-wrap:wrap;gap:0.8rem}
+  .paper-toolbar h3{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800}
+  .toolbar-right{display:flex;gap:0.6rem}
+  .tool-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:0.4rem 0.9rem;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;transition:.15s}
+  .tool-btn:hover{background:rgba(255,255,255,.3)}
+
+  .paper-body{padding:2.5rem;font-family:'Georgia',serif;color:#1a1a2e}
+  .paper-header-inner{text-align:center;border-bottom:3px double #1a1a2e;padding-bottom:1.2rem;margin-bottom:2rem}
+  .paper-institute{font-size:0.9rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#6b7280;margin-bottom:0.3rem}
+  .paper-title{font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:var(--purple);margin-bottom:0.2rem}
+  .paper-meta-row{display:flex;justify-content:space-between;font-size:0.82rem;font-weight:700;color:#374151;margin-top:0.8rem;flex-wrap:wrap;gap:0.5rem}
+  .paper-watermark{color:#f3f4f6;font-size:5rem;font-weight:900;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);pointer-events:none;font-family:'Baloo 2',cursive;white-space:nowrap}
+  .paper-body-inner{position:relative}
+
+  .q-section-title{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:#1a1a2e;border-bottom:2px solid #1a1a2e;padding-bottom:0.4rem;margin:1.8rem 0 1.2rem}
+  .q-item{margin-bottom:1.4rem;page-break-inside:avoid}
+  .q-item p{font-size:0.92rem;line-height:1.65;margin-bottom:0.5rem}
+  .q-item .options-list{padding-left:1.5rem;margin-top:0.4rem}
+  .q-item .options-list li{font-size:0.88rem;line-height:1.6;margin-bottom:0.2rem;list-style:lower-alpha}
+  .q-item .answer-space{border-bottom:1px solid #9ca3af;height:20px;margin:0.4rem 0}
+  .marks-badge{float:right;font-size:0.75rem;font-weight:700;color:var(--purple);background:var(--purple-light);padding:0.15rem 0.55rem;border-radius:50px;font-family:'Nunito',sans-serif}
+  .q-item strong{font-weight:800}
+
+  /* STATS */
+  .paper-stats{display:flex;gap:1rem;padding:1rem 1.5rem;background:#fafafa;border-top:2px solid var(--border);flex-wrap:wrap}
+  .pstat{text-align:center;flex:1;min-width:80px}
+  .pstat-num{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:var(--purple)}
+  .pstat-label{font-size:0.72rem;color:var(--muted);font-weight:700}
+
+  @media print{
+    nav,.config-card,.paper-toolbar,.paper-stats,.ai-loading{display:none!important}
+    .paper-card{border:none;border-radius:0}
+    .paper-body{padding:1rem}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Free<span>Cert</span>Hub</a>
+  <div class="nav-right">
+    <a href="courses.html" class="nav-link">Courses</a>
+    <a href="tutor.html" class="nav-link">AI Tutor</a>
+    <a href="dashboard.html" class="nav-btn">Dashboard</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="config-card">
+    <div class="card-header">
+      <h2>✨ AI Question Paper Generator</h2>
+      <p>Generate unlimited unique question papers powered by Claude AI — for any exam, any topic, any difficulty</p>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>📚 Exam Category</label>
+        <select id="category">
+          <option value="NCERT Class 10 Science">NCERT Class 10 — Science</option>
+          <option value="NCERT Class 10 Maths">NCERT Class 10 — Maths</option>
+          <option value="NCERT Class 12 Physics">NCERT Class 12 — Physics</option>
+          <option value="NCERT Class 12 Chemistry">NCERT Class 12 — Chemistry</option>
+          <option value="UPSC Prelims General Studies">UPSC Prelims — General Studies</option>
+          <option value="UPSC Indian History">UPSC — Indian History</option>
+          <option value="JEE Mains Physics">JEE Mains — Physics</option>
+          <option value="JEE Mains Chemistry">JEE Mains — Chemistry</option>
+          <option value="NEET Biology">NEET — Biology</option>
+          <option value="SSC CGL Reasoning">SSC CGL — Reasoning</option>
+          <option value="Python Programming">Python Programming</option>
+          <option value="Web Development HTML CSS JS">Web Development (HTML/CSS/JS)</option>
+          <option value="Data Structures and Algorithms">Data Structures & Algorithms</option>
+          <option value="General English Grammar">General English Grammar</option>
+          <option value="Custom (enter topic below)">Custom Topic (enter below)</option>
+        </select>
+      </div>
+      <div>
+        <label>🎯 Custom Topic (optional)</label>
+        <textarea class="topic-input" id="custom-topic" placeholder="E.g. Photosynthesis, Indian Constitution, Newton's Laws, Django REST API..."></textarea>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:1.2rem">
+      <div>
+        <label>⚡ Difficulty Level</label>
+        <select id="difficulty">
+          <option value="Beginner (easy, foundational)">Beginner / Easy</option>
+          <option value="Intermediate (moderate)" selected>Intermediate</option>
+          <option value="Advanced (hard, exam-level)">Advanced / Hard</option>
+          <option value="Expert (very tough, competition level)">Expert / Competition</option>
+        </select>
+      </div>
+      <div>
+        <label>📝 Paper Type</label>
+        <select id="paper-type">
+          <option value="MCQ only">MCQ Only</option>
+          <option value="Descriptive only">Descriptive Only</option>
+          <option value="Mixed (MCQ + Descriptive)" selected>Mixed (MCQ + Descriptive)</option>
+          <option value="Fill in the blanks">Fill in the Blanks</option>
+          <option value="True or False">True / False</option>
+        </select>
+      </div>
+      <div>
+        <label>🔢 Number of Questions</label>
+        <input type="number" id="num-q" value="10" min="5" max="30">
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1.2rem">
+      <div>
+        <label>⏱ Time Allowed</label>
+        <select id="time-allowed">
+          <option value="30 minutes">30 minutes</option>
+          <option value="1 hour" selected>1 hour</option>
+          <option value="2 hours">2 hours</option>
+          <option value="3 hours">3 hours</option>
+        </select>
+      </div>
+      <div>
+        <label>🏛️ Institution Name (for header)</label>
+        <input type="text" id="institution" value="Free Cert Hub — Practice Series" placeholder="E.g. Free Cert Hub">
+      </div>
+    </div>
+
+    <button class="gen-btn" id="gen-btn" onclick="generatePaper()">✨ Generate AI Question Paper</button>
+
+    <div style="margin-top:1rem">
+      <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:0.5rem">🕐 Recent generations:</div>
+      <div class="history-chips">
+        <button class="history-chip" onclick="quickGen('Python Programming','Mixed (MCQ + Descriptive)','Intermediate')">Python Mixed</button>
+        <button class="history-chip" onclick="quickGen('UPSC Prelims General Studies','MCQ only','Advanced (hard, exam-level)')">UPSC MCQ</button>
+        <button class="history-chip" onclick="quickGen('NCERT Class 10 Science','Mixed (MCQ + Descriptive)','Intermediate')">NCERT Sci</button>
+        <button class="history-chip" onclick="quickGen('JEE Mains Physics','MCQ only','Expert (very tough, competition level)')">JEE Physics</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI LOADING -->
+  <div class="ai-loading" id="ai-loading">
+    <div style="font-size:2.5rem;margin-bottom:0.8rem">🤖</div>
+    <h3>Claude AI is crafting your question paper...</h3>
+    <p style="font-size:0.85rem;color:var(--muted);font-weight:600">Generating unique, exam-quality questions based on your settings</p>
+    <div class="ai-progress"><div class="ai-progress-bar" id="prog-bar"></div></div>
+    <div class="ai-steps-list">
+      <div class="ai-step-item active" id="step-1">🧠 Analysing syllabus and topic scope...</div>
+      <div class="ai-step-item" id="step-2">📝 Drafting MCQ questions with distractors...</div>
+      <div class="ai-step-item" id="step-3">✍️ Composing descriptive questions...</div>
+      <div class="ai-step-item" id="step-4">🔍 Checking difficulty and quality...</div>
+      <div class="ai-step-item" id="step-5">📄 Formatting question paper...</div>
+    </div>
+  </div>
+
+  <!-- PAPER OUTPUT -->
+  <div class="paper-card" id="paper-card">
+    <div class="paper-toolbar">
+      <h3>📄 Generated Question Paper — Ready!</h3>
+      <div class="toolbar-right">
+        <button class="tool-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button class="tool-btn" onclick="generatePaper()">🔄 Regenerate</button>
+        <button class="tool-btn" onclick="document.getElementById('paper-card').classList.remove('show')">✕ Close</button>
+      </div>
+    </div>
+    <div class="paper-body">
+      <div class="paper-header-inner">
+        <div class="paper-institute" id="p-institute">Free Cert Hub</div>
+        <div class="paper-title" id="p-title">Question Paper</div>
+        <div style="font-size:0.82rem;font-weight:700;color:#6b7280" id="p-subtitle">Practice Series</div>
+        <div class="paper-meta-row">
+          <span>Time Allowed: <strong id="p-time">1 hour</strong></span>
+          <span>Total Marks: <strong id="p-marks">100</strong></span>
+          <span>Date: <strong id="p-date"></strong></span>
+        </div>
+        <div style="font-size:0.78rem;color:#9ca3af;margin-top:0.6rem;font-style:italic">AI-generated by FreeCertHub · Every paper is unique</div>
+      </div>
+      <div class="paper-body-inner">
+        <div style="position:relative;overflow:hidden">
+          <div class="paper-watermark" id="p-watermark">FREE CERT HUB</div>
+          <div id="questions-output"></div>
+        </div>
+      </div>
+    </div>
+    <div class="paper-stats" id="paper-stats"></div>
+  </div>
+
+</div>
+
+<script>
+  function quickGen(cat, type, diff) {
+    document.getElementById('category').value = cat;
+    document.getElementById('paper-type').value = type;
+    document.getElementById('difficulty').value = diff;
+    generatePaper();
+  }
+
+  async function generatePaper() {
+    const category = document.getElementById('category').value;
+    const customTopic = document.getElementById('custom-topic').value.trim();
+    const difficulty = document.getElementById('difficulty').value;
+    const paperType = document.getElementById('paper-type').value;
+    const numQ = parseInt(document.getElementById('num-q').value) || 10;
+    const timeAllowed = document.getElementById('time-allowed').value;
+    const institution = document.getElementById('institution').value || 'Free Cert Hub';
+    const topic = customTopic || category;
+
+    document.getElementById('paper-card').classList.remove('show');
+    document.getElementById('ai-loading').classList.add('show');
+    document.getElementById('gen-btn').disabled = true;
+
+    // Animate steps
+    const steps = ['step-1','step-2','step-3','step-4','step-5'];
+    steps.forEach((s,i) => {
+      setTimeout(() => {
+        document.querySelectorAll('.ai-step-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(s).classList.add('active','done');
+      }, i * 1500);
+    });
+
+    const totalMarks = numQ * 10;
+    const prompt = `You are an expert exam paper setter for FreeCertHub, an online learning platform in India.
+
+Generate a complete ${numQ}-question ${paperType} question paper for:
+- Topic: ${topic}
+- Difficulty: ${difficulty}
+- Paper Type: ${paperType}
+- For Indian students (CBSE/competitive exam style)
+
+STRICT FORMAT RULES — respond ONLY in this JSON (no markdown, no extra text):
+{
+  "title": "<exam title>",
+  "subtitle": "<e.g. 'Practice Paper Series 1' or 'Mock Test'>",
+  "instructions": "<2-3 general instructions for students>",
+  "sections": [
+    {
+      "name": "Section A — Multiple Choice Questions",
+      "type": "mcq",
+      "questions": [
+        {
+          "num": 1,
+          "text": "<question text>",
+          "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
+          "marks": 2
+        }
+      ]
+    },
+    {
+      "name": "Section B — Descriptive Questions",
+      "type": "descriptive",
+      "questions": [
+        {
+          "num": 6,
+          "text": "<question text>",
+          "marks": 10,
+          "hint": "<optional: key points to cover>"
+        }
+      ]
+    }
+  ]
+}
+
+Make questions ORIGINAL, TOUGH (based on ${difficulty}), and directly relevant to ${topic}.
+For MCQ: include plausible wrong options (distractors).
+For descriptive: ask for detailed explanations, real-world applications, or analysis.
+Split questions evenly across sections based on paper type.
+If paper type is MCQ only: only one section with all MCQ.
+If descriptive only: only one section with all descriptive.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await response.json();
+      let text = data.content[0].text.trim();
+      text = text.replace(/```json|```/g, '').trim();
+      const paper = JSON.parse(text);
+      renderPaper(paper, topic, institution, timeAllowed, totalMarks, numQ);
+    } catch(e) {
+      // Fallback if API fails
+      renderFallback(topic, institution, timeAllowed, totalMarks, numQ, paperType, difficulty);
+    }
+    document.getElementById('ai-loading').classList.remove('show');
+    document.getElementById('paper-card').classList.add('show');
+    document.getElementById('gen-btn').disabled = false;
+    document.getElementById('paper-card').scrollIntoView({behavior:'smooth'});
+  }
+
+  function renderPaper(paper, topic, institution, timeAllowed, totalMarks, numQ) {
+    document.getElementById('p-institute').textContent = institution;
+    document.getElementById('p-title').textContent = paper.title || topic + ' — Question Paper';
+    document.getElementById('p-subtitle').textContent = paper.subtitle || 'AI Practice Series';
+    document.getElementById('p-time').textContent = timeAllowed;
+    document.getElementById('p-marks').textContent = totalMarks;
+    document.getElementById('p-date').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+
+    let html = '';
+    if(paper.instructions) {
+      html += `<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:1rem;margin-bottom:1.5rem;font-size:0.85rem;color:#374151;line-height:1.7"><strong>📋 General Instructions:</strong><br>${paper.instructions}</div>`;
+    }
+    let mcqCount = 0, descCount = 0, totalM = 0;
+    paper.sections.forEach(section => {
+      html += `<div class="q-section-title">${section.name}</div>`;
+      section.questions.forEach(q => {
+        totalM += q.marks;
+        if(section.type === 'mcq') {
+          mcqCount++;
+          html += `<div class="q-item">
+            <p><span class="marks-badge">[${q.marks} Mark${q.marks>1?'s':''}]</span><strong>Q${q.num}.</strong> ${q.text}</p>
+            <ul class="options-list">${(q.options||[]).map(o=>`<li>${o}</li>`).join('')}</ul>
+          </div>`;
+        } else {
+          descCount++;
+          html += `<div class="q-item">
+            <p><span class="marks-badge">[${q.marks} Marks]</span><strong>Q${q.num}.</strong> ${q.text}</p>
+            ${q.hint?`<div style="font-size:0.78rem;color:#9ca3af;font-style:italic;margin-top:0.3rem;font-family:'Nunito',sans-serif">💡 Key points: ${q.hint}</div>`:''}
+            <div class="answer-space"></div>
+            <div class="answer-space"></div>
+            <div class="answer-space"></div>
+          </div>`;
+        }
+      });
+    });
+    document.getElementById('questions-output').innerHTML = html;
+    document.getElementById('paper-stats').innerHTML = `
+      <div class="pstat"><div class="pstat-num">${numQ}</div><div class="pstat-label">Questions</div></div>
+      <div class="pstat"><div class="pstat-num">${mcqCount}</div><div class="pstat-label">MCQ</div></div>
+      <div class="pstat"><div class="pstat-num">${descCount}</div><div class="pstat-label">Descriptive</div></div>
+      <div class="pstat"><div class="pstat-num">${totalMarks}</div><div class="pstat-label">Total Marks</div></div>
+      <div class="pstat"><div class="pstat-num">AI</div><div class="pstat-label">Generated</div></div>`;
+  }
+
+  function renderFallback(topic, institution, timeAllowed, totalMarks, numQ, paperType, difficulty) {
+    document.getElementById('p-institute').textContent = institution;
+    document.getElementById('p-title').textContent = topic + ' — Question Paper';
+    document.getElementById('p-subtitle').textContent = 'AI Practice Series';
+    document.getElementById('p-time').textContent = timeAllowed;
+    document.getElementById('p-marks').textContent = totalMarks;
+    document.getElementById('p-date').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+    let html = `<div class="q-section-title">Section A — Multiple Choice Questions</div>`;
+    for(let i=1;i<=Math.ceil(numQ/2);i++){
+      html+=`<div class="q-item"><p><span class="marks-badge">[2 Marks]</span><strong>Q${i}.</strong> This is a practice MCQ question about ${topic}. Select the most appropriate answer based on your understanding of the topic.</p><ul class="options-list"><li>First possible answer option</li><li>Second possible answer option</li><li>Third possible answer option</li><li>Fourth possible answer option</li></ul></div>`;
+    }
+    html+=`<div class="q-section-title">Section B — Descriptive Questions</div>`;
+    for(let i=Math.ceil(numQ/2)+1;i<=numQ;i++){
+      html+=`<div class="q-item"><p><span class="marks-badge">[10 Marks]</span><strong>Q${i}.</strong> Describe in detail the core concepts of ${topic}. Provide real-world examples and explain the significance in today's context. [Min 150 words]</p><div class="answer-space"></div><div class="answer-space"></div><div class="answer-space"></div></div>`;
+    }
+    document.getElementById('questions-output').innerHTML = html;
+    document.getElementById('paper-stats').innerHTML = `<div class="pstat"><div class="pstat-num">${numQ}</div><div class="pstat-label">Questions</div></div><div class="pstat"><div class="pstat-num">${totalMarks}</div><div class="pstat-label">Total Marks</div></div>`;
+  }
+</script>
+</body>
+</html>
