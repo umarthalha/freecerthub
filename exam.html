@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Exam — Free Cert Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--purple:#7c3aed;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--bg:#f8fafc}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:#1a1a2e;user-select:none}
+  .exam-header{background:#1e1b4b;color:#fff;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+  .logo{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800}
+  .logo span{color:#4ade80}
+  .header-right{display:flex;align-items:center;gap:1rem}
+  .timer{font-family:'Baloo 2',cursive;font-size:1.2rem;background:rgba(255,255,255,.12);padding:0.4rem 1rem;border-radius:12px}
+  .timer.danger{background:#dc2626;animation:pulse .8s infinite}
+  .warn-badge{background:#dc2626;color:#fff;padding:0.4rem 0.9rem;border-radius:50px;font-size:0.8rem;font-weight:800}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+  .container{max-width:820px;margin:2rem auto;padding:0 1rem}
+
+  /* Progress bar */
+  .exam-progress{background:#fff;border-radius:16px;padding:1rem 1.5rem;margin-bottom:1.5rem;border:2px solid #e5e7eb;display:flex;align-items:center;gap:1rem}
+  .prog-track{flex:1;height:8px;background:#e5e7eb;border-radius:50px;overflow:hidden}
+  .prog-track-fill{height:100%;background:linear-gradient(90deg,var(--purple),#a855f7);border-radius:50px;transition:width .5s}
+  .prog-text{font-size:0.82rem;font-weight:800;color:#6b7280;white-space:nowrap}
+
+  .q-card{background:#fff;border-radius:22px;padding:2rem;margin-bottom:1.5rem;border:2px solid #e5e7eb}
+  .section-label{display:inline-block;padding:0.3rem 0.9rem;border-radius:50px;font-size:0.75rem;font-weight:800;margin-bottom:1rem}
+  .sl-mcq{background:#ede9fe;color:var(--purple)}
+  .sl-desc{background:#ffedd5;color:var(--orange)}
+  .q-num{font-size:0.82rem;color:#9ca3af;font-weight:700;margin-bottom:0.4rem}
+  .q-card h3{font-family:'Baloo 2',cursive;font-size:1.2rem;margin-bottom:1.4rem;line-height:1.4}
+
+  .options{display:grid;gap:0.75rem}
+  .option{padding:0.9rem 1.2rem;border:2px solid #e5e7eb;border-radius:14px;cursor:pointer;font-weight:700;transition:.2s;display:flex;align-items:center;gap:0.8rem}
+  .option:hover{border-color:var(--purple);background:#f5f3ff}
+  .option.selected{border-color:var(--purple);background:var(--purple);color:#fff}
+  .opt-ltr{width:26px;height:26px;border-radius:7px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:900;flex-shrink:0}
+  .option.selected .opt-ltr{background:rgba(255,255,255,.25)}
+
+  .desc-hint{font-size:0.78rem;color:#9ca3af;font-weight:700;margin-bottom:0.6rem}
+  textarea{width:100%;height:160px;padding:1rem;border-radius:14px;border:2px solid #e5e7eb;font-family:'Nunito',sans-serif;font-size:0.95rem;resize:none;outline:none;transition:border .2s}
+  textarea:focus{border-color:var(--purple)}
+  .word-count{font-size:0.75rem;color:#9ca3af;font-weight:700;text-align:right;margin-top:0.3rem}
+
+  .submit-btn{width:100%;padding:1.1rem;background:var(--green);color:#fff;border:none;border-radius:50px;font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:900;cursor:pointer;transition:.2s;margin-top:0.5rem;box-shadow:0 4px 16px #16a34a33}
+  .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px #16a34a44}
+  .submit-btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* AI Grading Overlay */
+  .ai-overlay{display:none;position:fixed;inset:0;background:rgba(10,5,30,.9);z-index:2000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff}
+  .ai-overlay.show{display:flex}
+  .ai-ring{width:70px;height:70px;border:5px solid rgba(255,255,255,.15);border-top:5px solid #a78bfa;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:1.5rem}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ai-steps{display:flex;flex-direction:column;gap:0.5rem;margin-top:1rem}
+  .ai-step{font-size:0.85rem;color:#c4b5fd;font-weight:600;opacity:.4;transition:opacity .4s}
+  .ai-step.active{opacity:1;color:#fff}
+
+  /* Result Screen */
+  .result-screen{display:none;position:fixed;inset:0;background:#080418;z-index:3000;overflow-y:auto}
+  .result-screen.show{display:block}
+  .result-inner{max-width:640px;margin:0 auto;padding:3rem 1rem;text-align:center;color:#fff}
+  .res-badge{font-size:4.5rem;margin-bottom:1rem;animation:pop .5s ease}
+  @keyframes pop{0%{transform:scale(0.5)}100%{transform:scale(1)}}
+  .res-title{font-family:'Baloo 2',cursive;font-size:2.8rem;font-weight:800;margin-bottom:0.5rem}
+  .res-sub{color:#a78bfa;font-size:1rem;margin-bottom:2.5rem}
+  .score-circle{width:140px;height:140px;border-radius:50%;border:8px solid #4ade80;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 2.5rem;background:#120830}
+  .score-circle.fail{border-color:var(--red)}
+  .sc-pct{font-family:'Baloo 2',cursive;font-size:2.4rem;font-weight:800}
+  .sc-label{font-size:0.7rem;color:#9ca3af;font-weight:700}
+  .breakdown{background:#120830;border-radius:20px;padding:1.5rem;text-align:left;margin-bottom:1.5rem;border:1px solid #2e1f54}
+  .breakdown h3{font-family:'Baloo 2',cursive;color:#c4b5fd;font-size:1rem;margin-bottom:1rem}
+  .bd-row{display:flex;justify-content:space-between;padding:0.55rem 0;border-bottom:1px solid #1e1040;font-size:0.88rem;font-weight:600}
+  .bd-row:last-child{border-bottom:none}
+  .bd-label{color:#9ca3af}.bd-val{color:#e9d5ff;font-weight:800}
+  .cert-unlock{background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+  .cert-unlock-icon{font-size:2.5rem;flex-shrink:0}
+  .cert-unlock-text h3{font-family:'Baloo 2',cursive;font-size:1.1rem;color:#fff;margin-bottom:0.2rem}
+  .cert-unlock-text p{font-size:0.82rem;color:#dcfce7}
+  .ai-fb{background:#120830;border-radius:20px;padding:1.5rem;text-align:left;margin-bottom:2rem;border:1px solid #4c1d95}
+  .ai-fb h3{font-family:'Baloo 2',cursive;color:#a78bfa;font-size:1rem;margin-bottom:0.75rem}
+  .ai-fb p{color:#c4b5fd;font-size:0.88rem;line-height:1.7}
+  .res-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .rb{padding:0.8rem 1.8rem;border-radius:50px;font-weight:800;font-size:0.95rem;border:none;cursor:pointer;font-family:'Nunito',sans-serif;transition:.15s}
+  .rb-purple{background:var(--purple);color:#fff}
+  .rb-outline{background:#120830;color:#e9d5ff;border:2px solid #4c1d95}
+  .rb:hover{transform:scale(1.04)}
+
+  /* Toast */
+  .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;padding:0.75rem 1.8rem;border-radius:50px;font-weight:800;font-size:0.88rem;display:none;z-index:999;box-shadow:0 4px 20px #dc262655}
+</style>
+</head>
+<body oncontextmenu="return false">
+
+<div class="toast" id="toast">⚠️ Warning! Tab switch detected!</div>
+
+<div class="exam-header">
+  <div class="logo">FreeCert<span>Hub</span> — Final Exam</div>
+  <div class="header-right">
+    <div class="timer" id="clock">⏱ 20:00</div>
+    <div class="warn-badge" id="warn-badge">⚠️ Warns: 0/3</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="exam-progress">
+    <div class="prog-track"><div class="prog-track-fill" id="prog-fill" style="width:20%"></div></div>
+    <div class="prog-text" id="prog-text">Section 1 of 5</div>
+  </div>
+
+  <!-- MCQ 1 -->
+  <div class="q-card">
+    <span class="section-label sl-mcq">📝 Section A — Multiple Choice</span>
+    <div class="q-num">Question 1 of 3</div>
+    <h3>Which Python library is primarily used for data manipulation and analysis?</h3>
+    <div class="options">
+      <div class="option" onclick="pickMCQ(this,1,0)"><div class="opt-ltr">A</div>Matplotlib</div>
+      <div class="option" onclick="pickMCQ(this,1,1)"><div class="opt-ltr">B</div>Pandas ✓</div>
+      <div class="option" onclick="pickMCQ(this,1,2)"><div class="opt-ltr">C</div>Flask</div>
+      <div class="option" onclick="pickMCQ(this,1,3)"><div class="opt-ltr">D</div>PyGame</div>
+    </div>
+  </div>
+
+  <!-- MCQ 2 -->
+  <div class="q-card">
+    <span class="section-label sl-mcq">📝 Section A — Multiple Choice</span>
+    <div class="q-num">Question 2 of 3</div>
+    <h3>What does the <code style="background:#f3f4f6;padding:0.2rem 0.5rem;border-radius:6px">def</code> keyword do in Python?</h3>
+    <div class="options">
+      <div class="option" onclick="pickMCQ(this,2,0)"><div class="opt-ltr">A</div>Deletes a variable</div>
+      <div class="option" onclick="pickMCQ(this,2,1)"><div class="opt-ltr">B</div>Defines a new class</div>
+      <div class="option" onclick="pickMCQ(this,2,2)"><div class="opt-ltr">C</div>Defines a function ✓</div>
+      <div class="option" onclick="pickMCQ(this,2,3)"><div class="opt-ltr">D</div>Imports a module</div>
+    </div>
+  </div>
+
+  <!-- MCQ 3 -->
+  <div class="q-card">
+    <span class="section-label sl-mcq">📝 Section A — Multiple Choice</span>
+    <div class="q-num">Question 3 of 3</div>
+    <h3>Which of the following is the correct way to create a list in Python?</h3>
+    <div class="options">
+      <div class="option" onclick="pickMCQ(this,3,0)"><div class="opt-ltr">A</div><code>list = {1, 2, 3}</code></div>
+      <div class="option" onclick="pickMCQ(this,3,1)"><div class="opt-ltr">B</div><code>list = (1, 2, 3)</code></div>
+      <div class="option" onclick="pickMCQ(this,3,2)"><div class="opt-ltr">C</div><code>list = [1, 2, 3]</code> ✓</div>
+      <div class="option" onclick="pickMCQ(this,3,3)"><div class="opt-ltr">D</div><code>list = &lt;1, 2, 3&gt;</code></div>
+    </div>
+  </div>
+
+  <!-- Descriptive 1 -->
+  <div class="q-card">
+    <span class="section-label sl-desc">✍️ Section B — Descriptive (AI Graded)</span>
+    <div class="q-num">Question 4 of 5 — 40 Marks</div>
+    <h3>Explain the concept of Object-Oriented Programming (OOP) and describe any TWO of its core principles with real-world examples.</h3>
+    <div class="desc-hint">🤖 AI Detector active — write in your own words — paste blocked</div>
+    <textarea id="desc1" placeholder="Write your detailed answer here... (minimum 80 words for full marks)" oninput="wc('desc1','wc1')" onpaste="return false"></textarea>
+    <div class="word-count" id="wc1">0 words</div>
+  </div>
+
+  <!-- Descriptive 2 -->
+  <div class="q-card">
+    <span class="section-label sl-desc">✍️ Section B — Descriptive (AI Graded)</span>
+    <div class="q-num">Question 5 of 5 — 40 Marks</div>
+    <h3>Describe the importance of error handling in programming. Explain how Python's try-except block works and give a practical example of when you would use it.</h3>
+    <div class="desc-hint">🤖 AI Detector active — write in your own words — paste blocked</div>
+    <textarea id="desc2" placeholder="Write your detailed answer here... (minimum 80 words for full marks)" oninput="wc('desc2','wc2')" onpaste="return false"></textarea>
+    <div class="word-count" id="wc2">0 words</div>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitExam()">🏆 Submit Final Exam & Calculate Score</button>
+</div>
+
+<!-- AI Grading Overlay -->
+<div class="ai-overlay" id="ai-overlay">
+  <div class="ai-ring"></div>
+  <h2 style="font-family:'Baloo 2',cursive;font-size:1.5rem;margin-bottom:0.5rem">AI is grading your exam...</h2>
+  <p style="color:#a78bfa;margin-bottom:1.5rem">This takes about 10–15 seconds</p>
+  <div class="ai-steps">
+    <div class="ai-step active" id="step1">✅ Checking MCQ answers...</div>
+    <div class="ai-step" id="step2">🔍 Detecting AI-written content...</div>
+    <div class="ai-step" id="step3">🧠 Grading descriptive answers...</div>
+    <div class="ai-step" id="step4">📊 Calculating final score...</div>
+    <div class="ai-step" id="step5">📜 Checking certificate eligibility...</div>
+  </div>
+</div>
+
+<!-- Result Screen -->
+<div class="result-screen" id="result-screen">
+  <div class="result-inner">
+    <div class="res-badge" id="res-badge">🎉</div>
+    <div class="res-title" id="res-title">Exam Passed!</div>
+    <div class="res-sub" id="res-sub">Your certificate is now unlocked.</div>
+    <div class="score-circle" id="score-circle">
+      <div class="sc-pct" id="sc-pct">0%</div>
+      <div class="sc-label">FINAL SCORE</div>
+    </div>
+    <div class="breakdown">
+      <h3>📊 Detailed Breakdown</h3>
+      <div class="bd-row"><span class="bd-label">MCQ Score (3 questions)</span><span class="bd-val" id="bd-mcq">0/20</span></div>
+      <div class="bd-row"><span class="bd-label">Descriptive Q4 (AI Graded)</span><span class="bd-val" id="bd-d1">0/40</span></div>
+      <div class="bd-row"><span class="bd-label">Descriptive Q5 (AI Graded)</span><span class="bd-val" id="bd-d2">0/40</span></div>
+      <div class="bd-row"><span class="bd-label">Tab Switch Warnings</span><span class="bd-val" id="bd-warns">0</span></div>
+      <div class="bd-row"><span class="bd-label">AI Content Detected</span><span class="bd-val" id="bd-ai">No ✅</span></div>
+      <div class="bd-row" style="border-top:2px solid #2e1f54;margin-top:0.5rem;padding-top:0.8rem"><span class="bd-label" style="font-weight:800;color:#e9d5ff">TOTAL</span><span class="bd-val" id="bd-total" style="font-size:1.1rem;color:#4ade80">0/100</span></div>
+    </div>
+    <div class="cert-unlock" id="cert-unlock" style="display:none">
+      <div class="cert-unlock-icon">🎓</div>
+      <div class="cert-unlock-text">
+        <h3>Certificate Unlocked!</h3>
+        <p>You passed with flying colors. Download your official certificate now.</p>
+      </div>
+    </div>
+    <div class="ai-fb">
+      <h3>🤖 AI Examiner Feedback</h3>
+      <p id="ai-fb-text">Loading feedback...</p>
+    </div>
+    <div class="res-btns">
+      <button class="rb rb-outline" onclick="window.location.href='lesson.html'">← Back to Course</button>
+      <button class="rb rb-purple" id="cert-btn" onclick="window.location.href='certificate.html'" style="display:none">📜 Download Certificate</button>
+      <button class="rb rb-purple" onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let warns = 0, timerSec = 1200, timerInt;
+  const mcqAnswers = {1:-1, 2:-1, 3:-1};
+  const correctMCQ = {1:1, 2:2, 3:2};
+
+  timerInt = setInterval(() => {
+    timerSec--;
+    const m = Math.floor(timerSec/60), s = timerSec%60;
+    const el = document.getElementById('clock');
+    el.textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+    if(timerSec <= 300) el.classList.add('danger');
+    if(timerSec <= 0){ clearInterval(timerInt); submitExam(); }
+  }, 1000);
+
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) {
+      warns++;
+      document.getElementById('warn-badge').textContent = `⚠️ Warns: ${warns}/3`;
+      const t = document.getElementById('toast');
+      t.style.display = 'block';
+      setTimeout(() => t.style.display='none', 3000);
+      if(warns >= 3) { clearInterval(timerInt); submitExam(true); }
+    }
+  });
+
+  function pickMCQ(el, qNum, idx) {
+    el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    mcqAnswers[qNum] = idx;
+    const done = Object.values(mcqAnswers).filter(v=>v>=0).length;
+    document.getElementById('prog-fill').style.width = (20 + done*15) + '%';
+    document.getElementById('prog-text').textContent = `${done + 2} of 5 answered`;
+  }
+
+  function wc(id, wcId) {
+    const words = document.getElementById(id).value.trim().split(/\s+/).filter(w=>w).length;
+    const el = document.getElementById(wcId);
+    el.textContent = words + ' words' + (words < 80 ? ' (aim for 80+)' : ' ✓');
+    el.style.color = words >= 80 ? '#16a34a' : '#9ca3af';
+  }
+
+  async function submitExam(cheated = false) {
+    clearInterval(timerInt);
+    if(cheated) { showResult(true, 0, 0); return; }
+    const d1 = document.getElementById('desc1').value.trim();
+    const d2 = document.getElementById('desc2').value.trim();
+    if(!d1 || d1.split(/\s+/).length < 20) { alert('Please answer descriptive question 4 (min 20 words).'); return; }
+    if(!d2 || d2.split(/\s+/).length < 20) { alert('Please answer descriptive question 5 (min 20 words).'); return; }
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('ai-overlay').classList.add('show');
+
+    // Animate steps
+    const steps = ['step1','step2','step3','step4','step5'];
+    for(let i=1;i<steps.length;i++){
+      await new Promise(r => setTimeout(r, 2000));
+      document.getElementById(steps[i]).classList.add('active');
+    }
+
+    let d1Score = 0, d2Score = 0, aiFeedback = '', aiDetected = false;
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1200,
+          messages:[{role:'user',content:`You are a strict AI exam grader for FreeCertHub, an online learning platform.
+
+Grade these TWO descriptive exam answers. Be strict about AI-generated content.
+
+QUESTION 4 (40 marks): "Explain OOP and describe TWO core principles with real-world examples."
+ANSWER 4: "${d1}"
+
+QUESTION 5 (40 marks): "Describe error handling in Python, explain try-except, and give a practical example."
+ANSWER 5: "${d2}"
+
+GRADING CRITERIA per question (40 marks each):
+- Understanding & accuracy (15 marks)
+- Own words & originality (15 marks)  
+- Examples & explanation quality (10 marks)
+
+AI Detection: If answer is clearly AI-generated (perfect structure, overly formal, generic), give 0 for that question.
+
+Respond ONLY in this exact JSON (no markdown, no extra text):
+{"q4_score":<0-40>,"q5_score":<0-40>,"ai_detected":<true/false>,"feedback":"<3 sentences of specific feedback mentioning both answers>"}`
+        }]
+        })
+      });
+      const data = await resp.json();
+      const parsed = JSON.parse(data.content[0].text);
+      d1Score = parsed.q4_score;
+      d2Score = parsed.q5_score;
+      aiDetected = parsed.ai_detected;
+      aiFeedback = parsed.feedback;
+      if(aiDetected){ d1Score=0; d2Score=0; }
+    } catch(e) {
+      const w1 = d1.split(/\s+/).length, w2 = d2.split(/\s+/).length;
+      d1Score = Math.min(40, Math.floor(w1 * 0.35));
+      d2Score = Math.min(40, Math.floor(w2 * 0.35));
+      aiFeedback = "Your answers have been reviewed. Focus on providing specific examples to strengthen your explanations in future exams.";
+    }
+    document.getElementById('ai-overlay').classList.remove('show');
+    showResult(false, d1Score, d2Score, aiFeedback, aiDetected);
+  }
+
+  function showResult(cheated, d1=0, d2=0, feedback='', aiDetected=false) {
+    const screen = document.getElementById('result-screen');
+    screen.classList.add('show');
+    if(cheated || warns>=3){
+      document.getElementById('res-badge').textContent='❌';
+      document.getElementById('res-title').textContent='Exam Disqualified';
+      document.getElementById('res-sub').textContent='Too many violations detected.';
+      document.getElementById('score-circle').classList.add('fail');
+      document.getElementById('sc-pct').textContent='0%';
+      document.getElementById('bd-mcq').textContent='0/20';
+      document.getElementById('bd-d1').textContent='0/40';
+      document.getElementById('bd-d2').textContent='0/40';
+      document.getElementById('bd-total').textContent='0/100';
+      document.getElementById('bd-total').style.color='#dc2626';
+      document.getElementById('ai-fb-text').textContent='Your exam was disqualified due to integrity violations. Please retake the exam honestly.';
+      return;
+    }
+    const mcqScore = Object.keys(correctMCQ).reduce((s,q) => s + (mcqAnswers[q]===correctMCQ[q] ? 7 : 0), 0) + (Object.values(mcqAnswers).some(v=>v>=0) ? -1 : 0);
+    const mcqFinal = Object.keys(correctMCQ).filter(q=>mcqAnswers[q]===correctMCQ[q]).length * 7;
+    const total = mcqFinal + d1 + d2;
+    const pct = Math.round(total);
+    const passed = pct >= 50;
+    document.getElementById('res-badge').textContent = passed?'🎉':'😔';
+    document.getElementById('res-title').textContent = passed?'Exam Passed!':'Exam Failed';
+    document.getElementById('res-sub').textContent = passed?'Congratulations! Your certificate is unlocked.':'You needed 50% to pass. Review and try again!';
+    document.getElementById('score-circle').className='score-circle'+(passed?'':' fail');
+    document.getElementById('sc-pct').textContent=pct+'%';
+    document.getElementById('bd-mcq').textContent=mcqFinal+'/21';
+    document.getElementById('bd-d1').textContent=d1+'/40';
+    document.getElementById('bd-d2').textContent=d2+'/40';
+    document.getElementById('bd-warns').textContent=warns;
+    document.getElementById('bd-ai').textContent=aiDetected?'YES ⚠️ (0 marks)':'No ✅';
+    document.getElementById('bd-total').textContent=pct+'/100';
+    document.getElementById('bd-total').style.color=passed?'#4ade80':'#dc2626';
+    document.getElementById('ai-fb-text').textContent=feedback||'Keep practicing and reviewing lesson materials for better results.';
+    if(passed){
+      document.getElementById('cert-unlock').style.display='flex';
+      document.getElementById('cert-btn').style.display='inline-block';
+    }
+  }
+</script>
+</body>
+</html>
