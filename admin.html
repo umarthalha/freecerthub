@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Create Courses — Free Cert Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'; // 👈 replace
+  const SUPABASE_KEY = 'YOUR_ANON_PUBLIC_KEY_HERE';           // 👈 replace
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--purple:#7c3aed;--green:#16a34a;--orange:#ea580c;--red:#dc2626;--blue:#2563eb;--bg:#f0f2f8;--border:#e5e7eb;--text:#1a1a2e;--muted:#6b7280}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
+  a{text-decoration:none;color:inherit}
+
+  nav{background:#1e1b4b;color:#fff;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .logo{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:#a78bfa}
+  .logo span{color:#4ade80}
+  .admin-badge{background:#7c3aed;color:#fff;font-size:0.75rem;font-weight:800;padding:0.3rem 0.8rem;border-radius:50px;margin-left:0.5rem}
+  .nav-right{display:flex;gap:0.8rem;align-items:center}
+  .nav-btn{font-size:0.82rem;font-weight:700;color:#c4b5fd;padding:0.4rem 0.9rem;border:1px solid #4c1d95;border-radius:50px;transition:.2s;cursor:pointer;background:none}
+  .nav-btn:hover{background:#4c1d95;color:#fff}
+
+  .layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 57px)}
+
+  /* SIDEBAR */
+  .sidebar{background:#fff;border-right:2px solid var(--border);padding:1.5rem 1rem}
+  .sidebar h3{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:var(--purple);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--border)}
+  .slink{display:flex;align-items:center;gap:0.7rem;padding:0.7rem 0.8rem;border-radius:12px;font-weight:700;font-size:0.88rem;color:var(--muted);cursor:pointer;transition:.15s;margin-bottom:0.2rem;border:none;background:none;width:100%;font-family:'Nunito',sans-serif;text-align:left}
+  .slink:hover{background:#f5f3ff;color:var(--purple)}
+  .slink.active{background:var(--purple);color:#fff}
+  .slink .icon{font-size:1rem;width:20px;text-align:center}
+  .course-list-sidebar{margin-top:1rem}
+  .course-item-sb{padding:0.6rem 0.8rem;border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:0.2rem;border:1px solid var(--border)}
+  .course-item-sb:hover{border-color:var(--purple);background:#f5f3ff}
+  .course-item-sb h4{font-size:0.82rem;font-weight:800;color:var(--text)}
+  .course-item-sb p{font-size:0.7rem;color:var(--muted);font-weight:600;margin-top:0.1rem}
+  .pub-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+  .dot-green{background:var(--green)}
+  .dot-gray{background:#9ca3af}
+
+  /* MAIN */
+  .main-area{padding:2rem;overflow-y:auto}
+
+  /* SECTION PANELS */
+  .panel{display:none}
+  .panel.show{display:block}
+  .panel-title{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:var(--text);margin-bottom:0.3rem}
+  .panel-sub{font-size:0.85rem;color:var(--muted);font-weight:600;margin-bottom:1.5rem}
+
+  /* CARDS */
+  .card{background:#fff;border-radius:20px;padding:1.5rem;border:2px solid var(--border);margin-bottom:1.5rem}
+  .card-title{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:var(--text);margin-bottom:1.2rem;display:flex;align-items:center;gap:0.5rem}
+
+  /* FORM ELEMENTS */
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  .form-row.three{grid-template-columns:1fr 1fr 1fr}
+  .form-group{margin-bottom:1rem}
+  label{display:block;font-weight:800;font-size:0.82rem;color:#374151;margin-bottom:0.4rem}
+  input[type="text"],input[type="number"],input[type="url"],select,textarea{width:100%;padding:0.7rem 1rem;border:2px solid var(--border);border-radius:12px;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;color:var(--text);outline:none;transition:border .2s;background:#fafafa}
+  input:focus,select:focus,textarea:focus{border-color:var(--purple);background:#fff}
+  textarea{resize:vertical;min-height:80px}
+
+  .btn{padding:0.65rem 1.4rem;border-radius:50px;font-weight:800;font-size:0.88rem;border:none;cursor:pointer;font-family:'Nunito',sans-serif;transition:.2s}
+  .btn-purple{background:var(--purple);color:#fff}
+  .btn-purple:hover{background:#6d28d9;transform:translateY(-1px)}
+  .btn-green{background:var(--green);color:#fff}
+  .btn-green:hover{background:#15803d}
+  .btn-red{background:var(--red);color:#fff}
+  .btn-outline{background:#fff;color:var(--purple);border:2px solid var(--purple)}
+  .btn-outline:hover{background:var(--purple);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* LESSON LIST */
+  .lesson-rows{display:flex;flex-direction:column;gap:0.6rem}
+  .lesson-row{display:flex;align-items:center;gap:1rem;background:#f9fafb;border:2px solid var(--border);border-radius:14px;padding:0.9rem 1.1rem;transition:.15s}
+  .lesson-row:hover{border-color:var(--purple)}
+  .lesson-num-badge{width:32px;height:32px;border-radius:10px;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.85rem;flex-shrink:0}
+  .lesson-info{flex:1;min-width:0}
+  .lesson-info h4{font-size:0.88rem;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lesson-info p{font-size:0.75rem;color:var(--muted);font-weight:600;margin-top:0.1rem}
+  .lesson-yt{font-size:0.72rem;font-weight:700;color:#ef4444;background:#fee2e2;padding:0.2rem 0.55rem;border-radius:50px}
+  .lesson-actions{display:flex;gap:0.5rem;flex-shrink:0}
+  .icon-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:.15s}
+  .ib-red{background:#fee2e2;color:var(--red)}
+  .ib-red:hover{background:var(--red);color:#fff}
+  .ib-blue{background:#dbeafe;color:var(--blue)}
+  .ib-blue:hover{background:var(--blue);color:#fff}
+
+  /* YOUTUBE PREVIEW */
+  .yt-preview{background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;margin-top:0.8rem;display:none}
+  .yt-preview iframe{width:100%;height:100%;border:none}
+
+  /* STATS */
+  .stats-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+  .stat-mini{background:#fff;border-radius:16px;padding:1.2rem;border:2px solid var(--border);text-align:center}
+  .stat-mini .num{font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--purple)}
+  .stat-mini .lbl{font-size:0.75rem;color:var(--muted);font-weight:700;margin-top:0.1rem}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:0.8rem 2rem;border-radius:50px;font-weight:800;font-size:0.9rem;z-index:999;display:none;box-shadow:0 4px 20px #0003;animation:slideUp .3s ease}
+  @keyframes slideUp{from{bottom:1rem;opacity:0}to{bottom:2rem;opacity:1}}
+  .toast.green{background:var(--green);color:#fff}
+  .toast.red{background:var(--red);color:#fff}
+
+  /* NOTE */
+  .note{display:flex;gap:0.7rem;padding:0.8rem 1rem;border-radius:12px;margin-bottom:1rem;font-size:0.83rem;font-weight:600}
+  .note-blue{background:#eff6ff;border:2px solid #93c5fd;color:#1e3a5f}
+  .note-orange{background:#fff7ed;border:2px solid #fed7aa;color:#7c2d12}
+  .note-green{background:#f0fdf4;border:2px solid #86efac;color:#14532d}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display:flex;align-items:center">
+    <a href="index.html" class="logo">Free<span>Cert</span>Hub</a>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div class="nav-right">
+    <span id="admin-name" style="font-size:0.82rem;color:#c4b5fd;font-weight:700"></span>
+    <button class="nav-btn" onclick="window.location.href='dashboard.html'">Dashboard</button>
+    <button class="nav-btn" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h3>📋 Admin Panel</h3>
+    <button class="slink active" onclick="showPanel('overview',this)"><span class="icon">🏠</span> Overview</button>
+    <button class="slink" onclick="showPanel('new-course',this)"><span class="icon">➕</span> Create New Course</button>
+    <button class="slink" onclick="showPanel('add-lesson',this)"><span class="icon">🎬</span> Add Video Lessons</button>
+    <button class="slink" onclick="showPanel('manage',this)"><span class="icon">⚙️</span> Manage Courses</button>
+
+    <div style="margin-top:1.5rem">
+      <div style="font-size:0.72rem;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:0.6rem;padding:0 0.8rem">Your Courses</div>
+      <div class="course-list-sidebar" id="sidebar-courses">
+        <div style="font-size:0.8rem;color:#9ca3af;padding:0.5rem 0.8rem">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- OVERVIEW -->
+    <div class="panel show" id="panel-overview">
+      <div class="panel-title">👋 Welcome to Admin Panel</div>
+      <div class="panel-sub">Create courses, add YouTube video lessons, and manage your syllabus</div>
+      <div class="stats-mini">
+        <div class="stat-mini"><div class="num" id="stat-courses">0</div><div class="lbl">Total Courses</div></div>
+        <div class="stat-mini"><div class="num" id="stat-lessons">0</div><div class="lbl">Total Lessons</div></div>
+        <div class="stat-mini"><div class="num" id="stat-students">0</div><div class="lbl">Students</div></div>
+        <div class="stat-mini"><div class="num" id="stat-certs">0</div><div class="lbl">Certificates</div></div>
+      </div>
+      <div class="note note-blue">
+        <span>💡</span>
+        <div><strong>How it works:</strong> Create a course → Add YouTube video lessons one by one → Publish the course → Students can enroll, watch videos (non-skippable), take quizzes, and earn certificates.</div>
+      </div>
+      <div class="note note-orange">
+        <span>⚠️</span>
+        <div><strong>YouTube Video ID:</strong> From any YouTube video URL like <code>youtube.com/watch?v=<strong>kqtD5dpn9C8</strong></code> — the part after <strong>v=</strong> is the video ID. Example: <strong>kqtD5dpn9C8</strong></div>
+      </div>
+    </div>
+
+    <!-- CREATE NEW COURSE -->
+    <div class="panel" id="panel-new-course">
+      <div class="panel-title">➕ Create New Course</div>
+      <div class="panel-sub">Fill in the course details — you can add video lessons in the next step</div>
+
+      <div class="card">
+        <div class="card-title">📚 Course Information</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Course Title *</label>
+            <input type="text" id="c-title" placeholder="e.g. Python for Beginners">
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="c-category">
+              <option value="skill">💼 Skill Course</option>
+              <option value="competitive">🏆 Competitive Exam</option>
+              <option value="school">🏫 School (NCERT)</option>
+              <option value="jee">⚛️ JEE / NEET</option>
+              <option value="govt">🏛️ Govt Exam</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Course Description *</label>
+          <textarea id="c-desc" placeholder="What will students learn? Who is it for? What topics are covered?"></textarea>
+        </div>
+        <div class="form-row three">
+          <div class="form-group">
+            <label>Thumbnail Text</label>
+            <input type="text" id="c-thumb" placeholder="e.g. PY, UPSC, JEE" maxlength="5">
+          </div>
+          <div class="form-group">
+            <label>Card Color</label>
+            <select id="c-color">
+              <option value="orange">🟠 Orange</option>
+              <option value="purple">🟣 Purple</option>
+              <option value="green">🟢 Green</option>
+              <option value="blue">🔵 Blue</option>
+              <option value="pink">🩷 Pink</option>
+              <option value="teal">🩵 Teal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Publish Now?</label>
+            <select id="c-publish">
+              <option value="false">🔒 Save as Draft</option>
+              <option value="true">✅ Publish (visible to students)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-purple" id="create-course-btn" onclick="createCourse()">✅ Create Course</button>
+      </div>
+    </div>
+
+    <!-- ADD VIDEO LESSONS -->
+    <div class="panel" id="panel-add-lesson">
+      <div class="panel-title">🎬 Add Video Lessons</div>
+      <div class="panel-sub">Select a course and add YouTube video lessons to build your syllabus</div>
+
+      <!-- Select Course -->
+      <div class="card">
+        <div class="card-title">📚 Select Course to Add Lessons To</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Choose Course *</label>
+            <select id="lesson-course-select" onchange="loadCourseLessons()">
+              <option value="">-- Select a course --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lesson Number *</label>
+            <input type="number" id="l-num" value="1" min="1" max="200">
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Single Lesson -->
+      <div class="card">
+        <div class="card-title">➕ Add New Lesson</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Lesson Title *</label>
+            <input type="text" id="l-title" placeholder="e.g. Introduction to Variables">
+          </div>
+          <div class="form-group">
+            <label>YouTube Video ID *</label>
+            <input type="text" id="l-ytid" placeholder="e.g. kqtD5dpn9C8" oninput="previewVideo(this.value)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Short Description</label>
+            <input type="text" id="l-desc" placeholder="What does this lesson cover?">
+          </div>
+          <div class="form-group">
+            <label>Duration (minutes)</label>
+            <input type="number" id="l-duration" value="10" min="1" max="300">
+          </div>
+        </div>
+
+        <!-- YouTube Preview -->
+        <div class="yt-preview" id="yt-preview">
+          <iframe id="yt-frame" src="" allowfullscreen></iframe>
+        </div>
+
+        <div style="display:flex;gap:0.8rem;margin-top:1rem">
+          <button class="btn btn-purple" id="add-lesson-btn" onclick="addLesson()">➕ Add This Lesson</button>
+          <button class="btn btn-outline" onclick="document.getElementById('l-ytid').value='';document.getElementById('yt-preview').style.display='none'">Clear</button>
+        </div>
+      </div>
+
+      <!-- Current Lessons List -->
+      <div class="card" id="lessons-list-card" style="display:none">
+        <div class="card-title">📋 Lessons in this Course <span id="lesson-count-badge" style="background:#ede9fe;color:#7c3aed;font-size:0.75rem;font-weight:800;padding:0.2rem 0.6rem;border-radius:50px;margin-left:0.5rem"></span></div>
+        <div class="lesson-rows" id="lesson-rows"></div>
+        <div style="margin-top:1rem;display:flex;gap:0.8rem">
+          <button class="btn btn-green" onclick="publishCourse()">🚀 Publish Course</button>
+          <button class="btn btn-outline" onclick="window.location.href='lesson.html?course='+currentCourseId">👁️ Preview Lesson Page</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANAGE COURSES -->
+    <div class="panel" id="panel-manage">
+      <div class="panel-title">⚙️ Manage All Courses</div>
+      <div class="panel-sub">Edit, publish, or delete your courses</div>
+      <div id="manage-courses-list">
+        <div style="color:var(--muted);font-weight:700">Loading courses...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentCourseId = null;
+  let allCourses = [];
+
+  // ── AUTH CHECK ───────────────────────────────────
+  (async () => {
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+    const { data: profile } = await db.from('profiles').select('full_name').eq('id', user.id).single();
+    document.getElementById('admin-name').textContent = '👤 ' + (profile?.full_name || user.email);
+    loadAllData();
+  })();
+
+  async function logout() {
+    await db.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  // ── LOAD ALL DATA ────────────────────────────────
+  async function loadAllData() {
+    const { data: { user } } = await db.auth.getUser();
+
+    // Load courses created by this admin
+    const { data: courses } = await db
+      .from('courses').select('*, lessons(count)')
+      .eq('created_by', user.id)
+      .order('created_at', { ascending: false });
+
+    allCourses = courses || [];
+
+    // Update stats
+    document.getElementById('stat-courses').textContent = allCourses.length;
+    const totalLessons = allCourses.reduce((s,c) => s + (c.total_lessons||0), 0);
+    document.getElementById('stat-lessons').textContent = totalLessons;
+
+    // Load students and certs count
+    const { count: studentCount } = await db.from('profiles').select('*', {count:'exact',head:true});
+    const { count: certCount }    = await db.from('certificates').select('*', {count:'exact',head:true});
+    document.getElementById('stat-students').textContent = studentCount || 0;
+    document.getElementById('stat-certs').textContent    = certCount    || 0;
+
+    // Populate sidebar
+    const sb = document.getElementById('sidebar-courses');
+    if (allCourses.length === 0) {
+      sb.innerHTML = '<div style="font-size:0.78rem;color:#9ca3af;padding:0.5rem 0.8rem">No courses yet</div>';
+    } else {
+      sb.innerHTML = allCourses.map(c => `
+        <div class="course-item-sb" onclick="selectCourseFromSidebar('${c.id}','${c.title}')">
+          <h4><span class="pub-dot ${c.is_published?'dot-green':'dot-gray'}"></span>${c.title}</h4>
+          <p>${c.total_lessons} lessons · ${c.is_published?'Published':'Draft'}</p>
+        </div>`).join('');
+    }
+
+    // Populate course select dropdown
+    const sel = document.getElementById('lesson-course-select');
+    sel.innerHTML = '<option value="">-- Select a course --</option>' +
+      allCourses.map(c => `<option value="${c.id}">${c.title} (${c.total_lessons} lessons)</option>`).join('');
+
+    // Populate manage list
+    renderManageList();
+  }
+
+  function selectCourseFromSidebar(id, title) {
+    document.getElementById('lesson-course-select').value = id;
+    showPanel('add-lesson', document.querySelector('.slink:nth-child(3)'));
+    loadCourseLessons();
+  }
+
+  // ── PANELS ───────────────────────────────────────
+  function showPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+    document.getElementById('panel-' + name).classList.add('show');
+    document.querySelectorAll('.slink').forEach(s => s.classList.remove('active'));
+    if (el) el.classList.add('active');
+  }
+
+  // ── CREATE COURSE ────────────────────────────────
+  async function createCourse() {
+    const title    = document.getElementById('c-title').value.trim();
+    const desc     = document.getElementById('c-desc').value.trim();
+    const category = document.getElementById('c-category').value;
+    const thumb    = document.getElementById('c-thumb').value.trim() || title.substring(0,4).toUpperCase();
+    const color    = document.getElementById('c-color').value;
+    const publish  = document.getElementById('c-publish').value === 'true';
+
+    if (!title) { showToast('Please enter a course title!', 'red'); return; }
+    if (!desc)  { showToast('Please enter a description!',  'red'); return; }
+
+    const btn = document.getElementById('create-course-btn');
+    btn.disabled = true; btn.textContent = 'Creating...';
+
+    const { data: { user } } = await db.auth.getUser();
+    const { data, error } = await db.from('courses').insert({
+      title, description: desc, category,
+      thumbnail: thumb, color,
+      is_published: publish,
+      created_by: user.id,
+      total_lessons: 0
+    }).select().single();
+
+    btn.disabled = false; btn.textContent = '✅ Create Course';
+
+    if (error) { showToast('Error: ' + error.message, 'red'); return; }
+
+    showToast('✅ Course "' + title + '" created!', 'green');
+    // Reset form
+    ['c-title','c-desc','c-thumb'].forEach(id => document.getElementById(id).value = '');
+
+    await loadAllData();
+    // Switch to add lessons panel
+    document.getElementById('lesson-course-select').value = data.id;
+    showPanel('add-lesson', null);
+    loadCourseLessons();
+  }
+
+  // ── LOAD LESSONS FOR SELECTED COURSE ─────────────
+  async function loadCourseLessons() {
+    const courseId = document.getElementById('lesson-course-select').value;
+    if (!courseId) { document.getElementById('lessons-list-card').style.display = 'none'; return; }
+
+    currentCourseId = courseId;
+
+    const { data: lessons } = await db
+      .from('lessons').select('*')
+      .eq('course_id', courseId)
+      .order('lesson_num', { ascending: true });
+
+    const card = document.getElementById('lessons-list-card');
+    const rows = document.getElementById('lesson-rows');
+    card.style.display = 'block';
+
+    // Set next lesson number
+    const nextNum = lessons?.length ? Math.max(...lessons.map(l => l.lesson_num)) + 1 : 1;
+    document.getElementById('l-num').value = nextNum;
+
+    document.getElementById('lesson-count-badge').textContent = (lessons?.length || 0) + ' lessons';
+
+    if (!lessons?.length) {
+      rows.innerHTML = '<div style="color:var(--muted);font-weight:700;padding:0.5rem">No lessons yet — add your first video above!</div>';
+      return;
+    }
+
+    rows.innerHTML = lessons.map(l => `
+      <div class="lesson-row" id="lr-${l.id}">
+        <div class="lesson-num-badge">${l.lesson_num}</div>
+        <div class="lesson-info">
+          <h4>${l.title}</h4>
+          <p>${l.description || 'No description'} · ${l.duration_min} mins</p>
+        </div>
+        <span class="lesson-yt">▶ ${l.youtube_id}</span>
+        <div class="lesson-actions">
+          <button class="icon-btn ib-blue" onclick="previewLesson('${l.youtube_id}')" title="Preview">👁️</button>
+          <button class="icon-btn ib-red"  onclick="deleteLesson('${l.id}')" title="Delete">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── PREVIEW YOUTUBE VIDEO ────────────────────────
+  function previewVideo(ytId) {
+    const cleanId = extractYtId(ytId);
+    const preview = document.getElementById('yt-preview');
+    const frame   = document.getElementById('yt-frame');
+    if (cleanId && cleanId.length >= 10) {
+      frame.src = 'https://www.youtube.com/embed/' + cleanId;
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  function previewLesson(ytId) {
+    window.open('https://www.youtube.com/watch?v=' + ytId, '_blank');
+  }
+
+  // Extract video ID from URL or raw ID
+  function extractYtId(input) {
+    input = input.trim();
+    // Full URL formats
+    const match = input.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{10,12})/);
+    if (match) return match[1];
+    // Already just an ID
+    if (/^[a-zA-Z0-9_-]{10,12}$/.test(input)) return input;
+    return input;
+  }
+
+  // ── ADD LESSON ───────────────────────────────────
+  async function addLesson() {
+    const courseId = document.getElementById('lesson-course-select').value;
+    const num      = parseInt(document.getElementById('l-num').value);
+    const title    = document.getElementById('l-title').value.trim();
+    const ytRaw    = document.getElementById('l-ytid').value.trim();
+    const desc     = document.getElementById('l-desc').value.trim();
+    const duration = parseInt(document.getElementById('l-duration').value) || 10;
+
+    if (!courseId) { showToast('Please select a course first!', 'red'); return; }
+    if (!title)    { showToast('Please enter a lesson title!',  'red'); return; }
+    if (!ytRaw)    { showToast('Please enter a YouTube video ID!', 'red'); return; }
+
+    const ytId = extractYtId(ytRaw);
+
+    const btn = document.getElementById('add-lesson-btn');
+    btn.disabled = true; btn.textContent = 'Adding...';
+
+    const { error } = await db.from('lessons').insert({
+      course_id:    courseId,
+      lesson_num:   num,
+      title:        title,
+      description:  desc,
+      youtube_id:   ytId,
+      duration_min: duration,
+      has_quiz:     true
+    });
+
+    if (error) {
+      showToast('Error: ' + error.message, 'red');
+      btn.disabled = false; btn.textContent = '➕ Add This Lesson';
+      return;
+    }
+
+    // Update total_lessons count
+    const { data: lessons } = await db.from('lessons').select('id').eq('course_id', courseId);
+    await db.from('courses').update({ total_lessons: lessons.length }).eq('id', courseId);
+
+    showToast('✅ Lesson ' + num + ' added: ' + title, 'green');
+
+    // Clear lesson fields
+    document.getElementById('l-title').value = '';
+    document.getElementById('l-ytid').value  = '';
+    document.getElementById('l-desc').value  = '';
+    document.getElementById('yt-preview').style.display = 'none';
+
+    btn.disabled = false; btn.textContent = '➕ Add This Lesson';
+    await loadCourseLessons();
+    await loadAllData();
+  }
+
+  // ── DELETE LESSON ────────────────────────────────
+  async function deleteLesson(lessonId) {
+    if (!confirm('Delete this lesson? This cannot be undone.')) return;
+    const { error } = await db.from('lessons').delete().eq('id', lessonId);
+    if (error) { showToast('Error: ' + error.message, 'red'); return; }
+    // Update count
+    const { data: lessons } = await db.from('lessons').select('id').eq('course_id', currentCourseId);
+    await db.from('courses').update({ total_lessons: lessons.length }).eq('id', currentCourseId);
+    showToast('🗑️ Lesson deleted', 'green');
+    await loadCourseLessons();
+  }
+
+  // ── PUBLISH COURSE ───────────────────────────────
+  async function publishCourse() {
+    if (!currentCourseId) return;
+    const { data: lessons } = await db.from('lessons').select('id').eq('course_id', currentCourseId);
+    if (!lessons?.length) { showToast('Add at least 1 lesson before publishing!', 'red'); return; }
+    await db.from('courses').update({ is_published: true }).eq('id', currentCourseId);
+    showToast('🚀 Course published! Students can now see it.', 'green');
+    await loadAllData();
+  }
+
+  // ── MANAGE LIST ──────────────────────────────────
+  function renderManageList() {
+    const cont = document.getElementById('manage-courses-list');
+    if (!allCourses.length) {
+      cont.innerHTML = '<div style="color:var(--muted);font-weight:700">No courses yet — create one first!</div>';
+      return;
+    }
+    cont.innerHTML = allCourses.map(c => `
+      <div style="background:#fff;border:2px solid var(--border);border-radius:16px;padding:1.2rem 1.4rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem">
+        <div style="width:50px;height:50px;border-radius:12px;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;font-family:'Baloo 2',cursive;flex-shrink:0">${c.thumbnail||'?'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:0.95rem;color:var(--text)">${c.title}</div>
+          <div style="font-size:0.75rem;color:var(--muted);font-weight:600;margin-top:0.15rem">${c.total_lessons} lessons · ${c.category} · ${c.is_published?'<span style="color:var(--green);font-weight:800">✅ Published</span>':'<span style="color:#9ca3af;font-weight:800">🔒 Draft</span>'}</div>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-shrink:0">
+          <button class="btn btn-outline" style="font-size:0.78rem;padding:0.4rem 0.8rem" onclick="editCourse('${c.id}')">✏️ Edit Lessons</button>
+          ${!c.is_published ? `<button class="btn btn-green" style="font-size:0.78rem;padding:0.4rem 0.8rem" onclick="publishById('${c.id}')">🚀 Publish</button>` : ''}
+          <button class="btn btn-red" style="font-size:0.78rem;padding:0.4rem 0.8rem" onclick="deleteCourse('${c.id}','${c.title}')">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function editCourse(id) {
+    document.getElementById('lesson-course-select').value = id;
+    showPanel('add-lesson', null);
+    loadCourseLessons();
+  }
+
+  async function publishById(id) {
+    await db.from('courses').update({ is_published: true }).eq('id', id);
+    showToast('✅ Course published!', 'green');
+    await loadAllData();
+    renderManageList();
+  }
+
+  async function deleteCourse(id, title) {
+    if (!confirm('Delete "' + title + '"? ALL lessons will be deleted too!')) return;
+    await db.from('courses').delete().eq('id', id);
+    showToast('🗑️ Course deleted', 'green');
+    await loadAllData();
+  }
+
+  // ── TOAST ─────────────────────────────────────────
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3500);
+  }
+</script>
+</body>
+</html>
